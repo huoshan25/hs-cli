@@ -7,6 +7,7 @@ dist
 build
 lib
 *.tgz
+*.tsbuildinfo
 
 # 日志
 logs

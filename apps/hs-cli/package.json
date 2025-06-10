@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "copy-templates": "node -e \"require('fs-extra').copySync('src/templates', 'dist/templates')\"",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"No tests yet\"",
