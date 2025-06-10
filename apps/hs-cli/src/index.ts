@@ -11,7 +11,7 @@ const program = new Command();
 
 // 设置CLI基本信息
 program
-  .name('my-cli')
+  .name('hs-cli')
   .description('一个用于快速生成项目脚手架的CLI工具')
   .version('1.0.0', '-v, --version', '显示当前版本');
 
@@ -23,9 +23,9 @@ initCommand(program);
 // 添加帮助信息
 program.addHelpText('after', `
 示例:
-  $ my-cli create my-app
-  $ my-cli generate component Button
-  $ my-cli init --force
+  $ hs-cli create my-app
+  $ hs-cli generate component Button
+  $ hs-cli init --force
 `);
 
 // 解析命令行参数

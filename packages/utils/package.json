@@ -1,7 +1,7 @@
 {
-  "name": "@my-cli/utils",
+  "name": "@hs-cli/utils",
   "version": "1.0.0",
-  "description": "公共工具函数",
+  "description": "HS CLI 公共工具函数",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
-import { formatLog, validateName } from '@my-cli/utils';
+import { formatLog, validateName } from '@hs-cli/utils';
 
 export function createCommand(program: Command): void {
   program

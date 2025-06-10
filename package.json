@@ -1,21 +1,35 @@
 {
-  "name": "my-cli",
+  "name": "hs-cli",
   "version": "1.0.0",
   "private": true,
-  "description": "Node.js CLI 脚手架工具",
+  "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
   "bin": {
-    "my-cli": "bin/my-cli.js"
+    "hs-cli": "bin/hs-cli.js"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node bin/my-cli.js",
+    "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"No tests yet\"",
     "lint": "eslint src --ext .ts",
-    "cli:create": "node bin/my-cli.js create",
-    "cli:generate": "node bin/my-cli.js generate",
-    "cli:init": "node bin/my-cli.js init"
+    "cli:create": "node bin/hs-cli.js create",
+    "cli:generate": "node bin/hs-cli.js generate",
+    "cli:init": "node bin/hs-cli.js init"
+  },
+  "dependencies": {
+    "@hs-cli/utils": "workspace:*",
+    "commander": "^10.0.0",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.5",
+    "fs-extra": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/inquirer": "^8.2.5",
+    "@types/node": "^18.15.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
   },
   "keywords": [
     "cli",
@@ -23,12 +37,5 @@
     "generator"
   ],
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/inquirer": "^8.2.5",
-    "@types/node": "^18.15.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
-  }
+  "license": "MIT"
 }
