@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
-import { formatLog } from '@my-cli/utils';
+import { formatLog } from '@hs-cli/utils';
 
 export function initCommand(program: Command): void {
   program
@@ -33,7 +33,7 @@ export function initCommand(program: Command): void {
         
         // 创建配置文件
         const configContent = `/**
- * my-cli 配置文件
+ * hs-cli 配置文件
  */
 module.exports = {
   // 项目名称

@@ -7,7 +7,7 @@
 ```
 .
 ├── apps                       # 应用程序
-│   └── my-cli                 # CLI 脚手架工具
+│   └── mhs-cli                 # CLI 脚手架工具
 │       ├── bin                # 可执行文件
 │       └── src                # 源代码
 │           ├── commands       # 命令实现
@@ -33,7 +33,7 @@ pnpm build
 ### 运行 CLI
 
 ```bash
-cd apps/my-cli
+cd apps/hs-cli
 pnpm start
 ```
 
@@ -47,13 +47,13 @@ pnpm start
 
 ```bash
 # 创建一个新项目
-my-cli create my-app
+hs-cli create m\-app
 
 # 生成一个组件
-my-cli generate component Button
+hs-cli generate component Button
 
 # 在当前目录初始化配置
-my-cli init
+hs-cli init
 ```
 
 ## 许可证

@@ -8,7 +8,7 @@
     "hs-cli": "bin/hs-cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"No tests yet\"",
