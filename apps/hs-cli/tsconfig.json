@@ -14,7 +14,7 @@
     "noEmitOnError": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/templates/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/templates"],
   "references": [
     { "path": "../../packages/utils" }
   ]

@@ -1,6 +1,6 @@
 {
   "name": "create-hs-cli",
-  "version": "0.0.21",
+  "version": "0.0.23",
   "private": false,
   "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "powershell -Command \"if (Test-Path tsconfig.tsbuildinfo) { Remove-Item tsconfig.tsbuildinfo }\" && tsc",
     "copy-templates": "node -e \"require('fs-extra').copySync('src/templates', 'dist/templates')\"",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npm run copy-templates",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"No tests yet\"",
