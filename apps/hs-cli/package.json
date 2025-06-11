@@ -1,6 +1,6 @@
 {
   "name": "create-hs-cli",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "private": false,
   "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
@@ -43,7 +43,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/hs-cli.git"
+    "url": "https://github.com/huoshan25/node-cli-test"
   },
   "publishConfig": {
     "access": "public",
