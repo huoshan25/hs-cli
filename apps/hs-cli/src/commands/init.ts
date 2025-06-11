@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
-import { formatLog } from '@hs-cli/utils';
+import { formatLog } from '@huo-shan/utils';
 
 export function initCommand(program: Command): void {
   program

@@ -11,9 +11,9 @@ const program = new Command();
 
 // 设置CLI基本信息
 program
-  .name('hs-cli')
+  .name('create-hs-cli')
   .description('一个用于快速生成项目脚手架的CLI工具')
-  .version('1.0.0', '-v, --version', '显示当前版本');
+  .version('0.0.1', '-v, --version', '显示当前版本');
 
 // 注册命令
 createCommand(program);
@@ -23,16 +23,18 @@ initCommand(program);
 // 添加帮助信息
 program.addHelpText('after', `
 示例:
-  $ hs-cli create my-app
-  $ hs-cli generate component Button
-  $ hs-cli init --force
+  $ npx create-hs-cli
+  $ npx create-hs-cli --force
 `);
 
-// 解析命令行参数
-program.parse(process.argv);
+// 检查参数
+const hasArgs = process.argv.slice(2).length > 0;
 
-// 如果没有提供参数，则显示帮助信息并以0退出
-if (!process.argv.slice(2).length) {
-  program.outputHelp();
-  process.exit(0); // 确保以退出码0退出
-} 
+// 如果没有提供任何参数，则直接运行create命令
+if (!hasArgs) {
+  // 手动触发create命令
+  process.argv.push('create');
+}
+
+// 解析命令行参数
+program.parse(process.argv); 

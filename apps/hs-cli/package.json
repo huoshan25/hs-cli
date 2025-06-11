@@ -1,15 +1,16 @@
 {
-  "name": "@hs-cli/cli",
-  "version": "1.0.0",
-  "private": true,
+  "name": "create-hs-cli",
+  "version": "0.0.2",
+  "private": false,
   "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
   "bin": {
-    "hs-cli": "bin/hs-cli.js"
+    "create-hs-cli": "bin/hs-cli.js"
   },
   "scripts": {
     "build": "tsc",
     "copy-templates": "node -e \"require('fs-extra').copySync('src/templates', 'dist/templates')\"",
+    "prepublishOnly": "npm run build",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"No tests yet\"",
@@ -19,7 +20,7 @@
     "cli:init": "node bin/hs-cli.js init"
   },
   "dependencies": {
-    "@hs-cli/utils": "workspace:*",
+    "@huo-shan/utils": "workspace:*",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
     "inquirer": "^8.2.5",
@@ -35,8 +36,19 @@
   "keywords": [
     "cli",
     "scaffold",
-    "generator"
+    "generator",
+    "create"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/hs-cli.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "dependencies": {
+      "@huo-shan/utils": "^0.0.1"
+    }
+  }
 } 

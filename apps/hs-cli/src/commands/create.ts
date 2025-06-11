@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
-import { formatLog, validateName } from '@hs-cli/utils';
+import { formatLog, validateName } from '@huo-shan/utils';
 
 // 获取可用的模板列表
 async function getAvailableTemplates() {

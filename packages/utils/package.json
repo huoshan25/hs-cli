@@ -1,11 +1,13 @@
 {
-  "name": "@hs-cli/utils",
-  "version": "1.0.0",
+  "name": "@huo-shan/utils",
+  "version": "0.0.1",
   "description": "HS CLI 公共工具函数",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "private": false,
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "echo \"No tests yet\"",
     "lint": "eslint src --ext .ts"
   },
@@ -14,5 +16,8 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.9.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 } 

@@ -15,10 +15,14 @@
     "lint": "eslint src --ext .ts",
     "cli:create": "node bin/hs-cli.js create",
     "cli:generate": "node bin/hs-cli.js generate",
-    "cli:init": "node bin/hs-cli.js init"
+    "cli:init": "node bin/hs-cli.js init",
+    "build:all": "pnpm -r run build",
+    "publish:utils": "cd packages/utils && pnpm publish --no-git-checks",
+    "publish:cli": "cd apps/hs-cli && pnpm publish --no-git-checks",
+    "publish:all": "pnpm run publish:utils && pnpm run publish:cli"
   },
   "dependencies": {
-    "@hs-cli/utils": "workspace:*",
+    "@huo-shan/utils": "workspace:*",
     "commander": "^10.0.0",
     "chalk": "^4.1.2",
     "inquirer": "^8.2.5",

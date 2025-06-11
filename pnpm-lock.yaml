@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@hs-cli/utils':
+      '@huo-shan/utils':
         specifier: workspace:*
         version: link:packages/utils
       chalk:
@@ -42,7 +42,7 @@ importers:
 
   apps/hs-cli:
     dependencies:
-      '@hs-cli/utils':
+      '@huo-shan/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       chalk:

@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs-extra';
-import { formatLog, validateName, camelToKebab } from '@hs-cli/utils';
+import { formatLog, validateName, camelToKebab } from '@huo-shan/utils';
 
 type ComponentType = 'component' | 'page' | 'service' | 'hook';
 
