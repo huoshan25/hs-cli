@@ -10,10 +10,11 @@
     "forceConsistentCasingInFileNames": true,
     "composite": true,
     "rootDir": "./src",
-    "sourceMap": true
+    "sourceMap": true,
+    "noEmitOnError": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "src/templates"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/templates/**/*.ts"],
   "references": [
     { "path": "../../packages/utils" }
   ]

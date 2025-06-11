@@ -8,7 +8,7 @@
     "create-hs-cli": "bin/hs-cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "powershell -Command \"if (Test-Path tsconfig.tsbuildinfo) { Remove-Item tsconfig.tsbuildinfo }\" && tsc",
     "copy-templates": "node -e \"require('fs-extra').copySync('src/templates', 'dist/templates')\"",
     "prepublishOnly": "npm run build",
     "start": "node bin/hs-cli.js",
