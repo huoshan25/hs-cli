@@ -37,7 +37,10 @@
     "cli",
     "scaffold",
     "generator",
-    "create"
+    "create",
+    "vue",
+    "nuxt",
+    "typescript"
   ],
   "author": "",
   "license": "MIT",

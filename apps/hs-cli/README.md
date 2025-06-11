@@ -73,21 +73,7 @@ npx create-hs-cli init
 - UnoCSS支持
 - 完整的项目结构和API示例
 
-## 项目结构
-
-```
-.
-├── apps                       # 应用程序
-│   └── hs-cli                 # CLI 脚手架工具
-│       ├── bin                # 可执行文件
-│       └── src                # 源代码
-│           ├── commands       # 命令实现
-│           └── templates      # 项目模板
-└── packages                   # 共享包
-    └── utils                  # 工具函数包
-```
-
-## 开发指南
+## 本地开发
 
 ### 安装依赖
 
@@ -95,12 +81,9 @@ npx create-hs-cli init
 pnpm install
 ```
 
-### 本地开发
+### 开发模式
 
 ```bash
-# 进入CLI目录
-cd apps/hs-cli
-
 # 开发模式运行
 pnpm dev
 
@@ -113,9 +96,6 @@ pnpm cli:init
 ### 本地链接测试
 
 ```bash
-# 进入CLI目录
-cd apps/hs-cli
-
 # 构建项目
 pnpm build
 
@@ -124,23 +104,6 @@ npm link
 
 # 现在你可以在任何地方使用
 create-hs-cli
-```
-
-### 构建项目
-
-```bash
-pnpm build:all
-```
-
-### 发布
-
-```bash
-# 发布所有包
-pnpm publish:all
-
-# 或单独发布
-pnpm publish:utils  # 发布工具包
-pnpm publish:cli    # 发布CLI包
 ```
 
 ## 许可证
