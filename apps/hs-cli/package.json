@@ -1,6 +1,6 @@
 {
   "name": "create-hs-cli",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "private": false,
   "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
