@@ -1,6 +1,6 @@
 {
   "name": "@huo-shan/utils",
-  "version": "0.0.1",
+  "version": "0.0.11",
   "description": "HS CLI 公共工具函数",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

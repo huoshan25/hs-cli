@@ -12,7 +12,7 @@ export function initCommand(program: Command): void {
     .option('-f, --force', '强制覆盖已存在的配置', false)
     .action(async (options) => {
       try {
-        const configFile = path.join(process.cwd(), 'my-cli.config.js');
+        const configFile = path.join(process.cwd(), 'hs-cli.config.js');
         
         // 检查配置文件是否已存在
         if (fs.existsSync(configFile) && !options.force) {
