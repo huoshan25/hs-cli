@@ -1,10 +1,16 @@
 {
   "name": "@huo-shan/utils",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "HS CLI 公共工具函数",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "private": false,
+  "files": [
+    "bin",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
