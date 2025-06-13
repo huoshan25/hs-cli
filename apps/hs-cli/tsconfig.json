@@ -8,14 +8,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "composite": true,
     "rootDir": "./src",
     "sourceMap": true,
     "noEmitOnError": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/templates"],
-  "references": [
-    { "path": "../../packages/utils" }
-  ]
-} 
+  "exclude": ["node_modules", "dist", "src/templates"]
+}
