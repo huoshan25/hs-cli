@@ -55,9 +55,6 @@
     "url": "https://github.com/huoshan25/node-cli-test"
   },
   "publishConfig": {
-    "access": "public",
-    "dependencies": {
-      "@huo-shan/utils": "^0.0.1"
-    }
+    "access": "public"
   }
 }
