@@ -8,6 +8,8 @@
 - 🛠️ 交互式命令行界面，简单易用
 - 📦 自动处理项目依赖和配置
 - 🔧 可扩展的命令系统
+- ✨ 支持模板特性选择，按需生成项目
+- 🎨 美观的命令行界面，带进度显示
 
 ## 安装
 
@@ -33,8 +35,9 @@ npx create-hs-cli
 
 执行命令后，会出现交互式提示：
 1. 选择项目模板（Vue3或Nuxt3）
-2. 输入项目名称
-3. 自动创建项目结构
+2. 选择项目特性（TypeScript、Router、Pinia等）
+3. 输入项目名称
+4. 自动创建项目结构
 
 ### 可用命令
 
@@ -43,6 +46,12 @@ npx create-hs-cli
 - `init`: 在当前目录初始化配置
 
 ```bash
+# 创建一个新项目
+npm create hs-cli
+
+# 查看帮助信息
+npx create-hs-cli --help
+
 # 生成一个组件
 npx create-hs-cli generate component Button
 
@@ -57,21 +66,27 @@ npx create-hs-cli init
 ### Vue3模板
 
 - 基于Vue 3和Vite构建
-- TypeScript支持
-- Pinia状态管理
-- Vue Router
-- UnoCSS原子化CSS
-- 自动导入组件和API
-- 完整的项目结构
+- 可选特性：
+  - TypeScript
+  - JSX支持
+  - Vue Router（单页面应用开发）
+  - Pinia（状态管理）
+  - UnoCSS（原子化CSS）
+  - Vitest（单元测试）
+  - Auto Import（自动导入）
+  - Components（组件自动注册）
 
 ### Nuxt3模板
 
 - 基于Nuxt 3框架
-- TypeScript支持
-- 服务端渲染(SSR)
-- API自动导入
-- UnoCSS支持
-- 完整的项目结构和API示例
+- 可选特性：
+  - TypeScript
+  - UnoCSS（原子化CSS）
+  - Sass（CSS预处理器）
+  - VueUse（实用工具集）
+  - Nuxt Image（图像优化）
+  - Auto Import（自动导入）
+  - Components（组件自动注册）
 
 ## 本地开发
 
