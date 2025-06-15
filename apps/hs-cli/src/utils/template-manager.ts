@@ -1,11 +1,15 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-// 定义模板特性接口
+/**
+ * 模板特性配置接口
+ */
 export interface TemplateFeature {
+  /** 特性名称 */
   name: string;
+  /** 特性描述 */
   message: string;
-  description: string;
+  /** 是否默认选中该特性 */
   checked: boolean;
 }
 
@@ -50,50 +54,42 @@ export class TemplateManager {
       {
         name: 'typescript',
         message: 'TypeScript',
-        description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
-        checked: true // Vue3模板默认使用TypeScript
+        checked: true
       },
       {
         name: 'jsx',
         message: 'JSX 支持',
-        description: '支持在 Vue 组件中使用 JSX 语法',
-        checked: true // Vue3模板默认支持JSX
+        checked: true
       },
       {
         name: 'router',
         message: 'Vue Router (单页面应用开发)',
-        description: '使用 Vue Router 进行路由管理，实现页面导航功能',
-        checked: true // Vue3模板默认包含Vue Router
+        checked: true
       },
       {
         name: 'pinia',
         message: 'Pinia (状态管理)',
-        description: '使用 Pinia 进行状态管理，提供更好的状态管理方案',
-        checked: true // Vue3模板默认包含Pinia
+        checked: true
       },
       {
         name: 'unocss',
         message: 'UnoCSS (原子化CSS)',
-        description: '使用 UnoCSS 原子化 CSS 框架，提供高效的样式开发体验',
-        checked: true // Vue3模板默认包含UnoCSS
+        checked: true
       },
       {
         name: 'vitest',
         message: 'Vitest (单元测试)',
-        description: '使用 Vitest 进行单元测试，确保代码质量',
-        checked: true // Vue3模板默认包含Vitest
+        checked: true
       },
       {
         name: 'auto-import',
         message: 'Auto Import (自动导入)',
-        description: '使用 unplugin-auto-import 自动导入 API，减少重复导入语句',
-        checked: true // Vue3模板默认包含Auto Import
+        checked: true
       },
       {
         name: 'components',
         message: 'Components (组件自动注册)',
-        description: '使用 unplugin-vue-components 自动注册组件，无需手动导入',
-        checked: true // Vue3模板默认包含Components
+        checked: true
       }
     ];
   }
@@ -106,44 +102,37 @@ export class TemplateManager {
       {
         name: 'typescript',
         message: 'TypeScript',
-        description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
-        checked: true // Nuxt3模板默认使用TypeScript
+        checked: true
       },
       {
         name: 'unocss',
         message: 'UnoCSS (原子化CSS)',
-        description: '使用 UnoCSS 原子化 CSS 框架，提供高效的样式开发体验',
-        checked: true // Nuxt3模板默认包含UnoCSS
+        checked: true
       },
       {
         name: 'sass',
         message: 'Sass (CSS预处理器)',
-        description: '使用 Sass 进行样式开发，提供更强大的样式编写能力',
-        checked: true // Nuxt3模板默认包含Sass
+        checked: true
       },
       {
         name: 'vueuse',
         message: 'VueUse (实用工具集)',
-        description: '使用 VueUse 提供的实用工具集，简化常见功能的实现',
-        checked: true // Nuxt3模板默认包含VueUse
+        checked: true
       },
       {
         name: 'nuxt-image',
         message: 'Nuxt Image (图像优化)',
-        description: '使用 Nuxt Image 模块进行图像优化，提升加载性能',
-        checked: true // Nuxt3模板默认包含Nuxt Image
+        checked: true
       },
       {
         name: 'auto-import',
         message: 'Auto Import (自动导入)',
-        description: '使用 unplugin-auto-import 自动导入 API，减少重复导入语句',
-        checked: true // Nuxt3模板默认包含Auto Import
+        checked: true
       },
       {
         name: 'components',
         message: 'Components (组件自动注册)',
-        description: '使用 unplugin-vue-components 自动注册组件，无需手动导入',
-        checked: true // Nuxt3模板默认包含Components
+        checked: true
       }
     ];
   }
