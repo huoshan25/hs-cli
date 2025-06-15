@@ -32,74 +32,120 @@ export class TemplateManager {
    * @param templateName 模板名称
    */
   getTemplateFeatures(templateName: string): TemplateFeature[] {
-    const features: Record<string, TemplateFeature[]> = {
-      vue3: [
-        {
-          name: 'typescript',
-          message: 'TypeScript',
-          description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
-          checked: false
-        },
-        {
-          name: 'jsx',
-          message: 'JSX 支持',
-          description: '支持在 Vue 组件中使用 JSX 语法',
-          checked: false
-        },
-        {
-          name: 'router',
-          message: 'Router (单页面应用开发)',
-          description: '使用 Vue Router 进行路由管理，实现页面导航功能',
-          checked: false
-        },
-        {
-          name: 'pinia',
-          message: 'Pinia (状态管理)',
-          description: '使用 Pinia 进行状态管理，提供更好的状态管理方案',
-          checked: false
-        },
-        {
-          name: 'vitest',
-          message: 'Vitest (单元测试)',
-          description: '使用 Vitest 进行单元测试，确保代码质量',
-          checked: false
-        },
-        {
-          name: 'eslint',
-          message: 'ESLint (错误预防)',
-          description: '使用 ESLint 进行代码检查，保持代码风格一致',
-          checked: false
-        },
-        {
-          name: 'prettier',
-          message: 'Prettier (代码格式化)',
-          description: '使用 Prettier 进行代码格式化，统一代码风格',
-          checked: false
-        }
-      ],
-      nuxt3: [
-        {
-          name: 'typescript',
-          message: 'TypeScript',
-          description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
-          checked: false
-        },
-        {
-          name: 'eslint',
-          message: 'ESLint',
-          description: '使用 ESLint 进行代码检查，保持代码风格一致',
-          checked: false
-        },
-        {
-          name: 'prettier',
-          message: 'Prettier',
-          description: '使用 Prettier 进行代码格式化，统一代码风格',
-          checked: false
-        }
-      ]
-    };
+    // 根据模板名称获取对应的特性
+    if (templateName === 'vue3') {
+      return this.getVue3Features();
+    } else if (templateName === 'nuxt3') {
+      return this.getNuxt3Features();
+    }
+    
+    return [];
+  }
 
-    return features[templateName as keyof typeof features] || [];
+  /**
+   * 获取Vue3模板的特性
+   */
+  private getVue3Features(): TemplateFeature[] {
+    return [
+      {
+        name: 'typescript',
+        message: 'TypeScript',
+        description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
+        checked: true // Vue3模板默认使用TypeScript
+      },
+      {
+        name: 'jsx',
+        message: 'JSX 支持',
+        description: '支持在 Vue 组件中使用 JSX 语法',
+        checked: true // Vue3模板默认支持JSX
+      },
+      {
+        name: 'router',
+        message: 'Vue Router (单页面应用开发)',
+        description: '使用 Vue Router 进行路由管理，实现页面导航功能',
+        checked: true // Vue3模板默认包含Vue Router
+      },
+      {
+        name: 'pinia',
+        message: 'Pinia (状态管理)',
+        description: '使用 Pinia 进行状态管理，提供更好的状态管理方案',
+        checked: true // Vue3模板默认包含Pinia
+      },
+      {
+        name: 'unocss',
+        message: 'UnoCSS (原子化CSS)',
+        description: '使用 UnoCSS 原子化 CSS 框架，提供高效的样式开发体验',
+        checked: true // Vue3模板默认包含UnoCSS
+      },
+      {
+        name: 'vitest',
+        message: 'Vitest (单元测试)',
+        description: '使用 Vitest 进行单元测试，确保代码质量',
+        checked: true // Vue3模板默认包含Vitest
+      },
+      {
+        name: 'auto-import',
+        message: 'Auto Import (自动导入)',
+        description: '使用 unplugin-auto-import 自动导入 API，减少重复导入语句',
+        checked: true // Vue3模板默认包含Auto Import
+      },
+      {
+        name: 'components',
+        message: 'Components (组件自动注册)',
+        description: '使用 unplugin-vue-components 自动注册组件，无需手动导入',
+        checked: true // Vue3模板默认包含Components
+      }
+    ];
+  }
+
+  /**
+   * 获取Nuxt3模板的特性
+   */
+  private getNuxt3Features(): TemplateFeature[] {
+    return [
+      {
+        name: 'typescript',
+        message: 'TypeScript',
+        description: '使用 TypeScript 进行开发，提供类型检查和更好的开发体验',
+        checked: true // Nuxt3模板默认使用TypeScript
+      },
+      {
+        name: 'unocss',
+        message: 'UnoCSS (原子化CSS)',
+        description: '使用 UnoCSS 原子化 CSS 框架，提供高效的样式开发体验',
+        checked: true // Nuxt3模板默认包含UnoCSS
+      },
+      {
+        name: 'sass',
+        message: 'Sass (CSS预处理器)',
+        description: '使用 Sass 进行样式开发，提供更强大的样式编写能力',
+        checked: true // Nuxt3模板默认包含Sass
+      },
+      {
+        name: 'vueuse',
+        message: 'VueUse (实用工具集)',
+        description: '使用 VueUse 提供的实用工具集，简化常见功能的实现',
+        checked: true // Nuxt3模板默认包含VueUse
+      },
+      {
+        name: 'nuxt-image',
+        message: 'Nuxt Image (图像优化)',
+        description: '使用 Nuxt Image 模块进行图像优化，提升加载性能',
+        checked: true // Nuxt3模板默认包含Nuxt Image
+      },
+      {
+        name: 'auto-import',
+        message: 'Auto Import (自动导入)',
+        description: '使用 unplugin-auto-import 自动导入 API，减少重复导入语句',
+        checked: true // Nuxt3模板默认包含Auto Import
+      },
+      {
+        name: 'components',
+        message: 'Components (组件自动注册)',
+        description: '使用 unplugin-vue-components 自动注册组件，无需手动导入',
+        checked: true // Nuxt3模板默认包含Components
+      }
+    ];
   }
 
   /**
@@ -115,449 +161,33 @@ export class TemplateManager {
     features: Record<string, boolean>,
     projectName: string
   ): Promise<void> {
-    // 生成基础模板
-    await this.generateBaseTemplate(templateName, targetDir);
-
-    // 生成特性文件
-    await this.generateFeatureFiles(targetDir, features);
-
-    // 处理 package.json
-    await this.processPackageJson(targetDir, templateName, features, projectName);
-  }
-
-  /**
-   * 生成基础模板
-   * @param templateName 模板名称
-   * @param targetDir 目标目录
-   */
-  private async generateBaseTemplate(templateName: string, targetDir: string): Promise<void> {
-    const baseTemplateDir = path.join(this.templatesDir, templateName, 'base');
+    const templateDir = path.join(this.templatesDir, templateName);
     
-    // 如果存在base目录，则复制整个目录
-    if (fs.existsSync(baseTemplateDir)) {
-      await fs.copy(baseTemplateDir, targetDir);
-      return;
+    // 确保模板目录存在
+    if (!fs.existsSync(templateDir)) {
+      throw new Error(`模板 ${templateName} 不存在`);
     }
+
+    // 复制整个模板目录到目标目录
+    await fs.copy(templateDir, targetDir);
+
+    // 处理项目名称
+    await this.processProjectName(targetDir, projectName);
     
-    // 否则使用内置的基础模板
-    const baseFiles = this.getBaseFiles(templateName);
-    
-    for (const [file, content] of Object.entries(baseFiles)) {
-      const filePath = path.join(targetDir, file);
-      await fs.ensureDir(path.dirname(filePath));
-      
-      if (typeof content === 'string') {
-        await fs.writeFile(filePath, content);
-      } else {
-        await fs.writeJson(filePath, content, { spaces: 2 });
-      }
-    }
+    // 根据选择的特性处理项目文件
+    await this.processFeatures(templateName, targetDir, features);
   }
 
   /**
-   * 获取基础文件
+   * 根据选择的特性处理项目文件
    * @param templateName 模板名称
-   */
-  private getBaseFiles(templateName: string): Record<string, any> {
-    const baseFiles: Record<string, Record<string, any>> = {
-      vue3: {
-        'package.json': {
-          name: '{{name}}',
-          private: true,
-          version: '0.0.0',
-          type: 'module',
-          scripts: {
-            dev: 'vite',
-            build: 'vite build',
-            preview: 'vite preview'
-          },
-          dependencies: {
-            vue: '^3.3.0'
-          },
-          devDependencies: {
-            '@vitejs/plugin-vue': '^4.2.0',
-            vite: '^4.3.0'
-          }
-        },
-        'index.html': `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{name}}</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>`,
-        'vite.config.js': `import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-
-export default defineConfig({
-  plugins: [vue()],
-})`,
-        'src/main.js': `import { createApp } from 'vue'
-import App from './App.vue'
-
-createApp(App).mount('#app')`,
-        'src/App.vue': `<template>
-  <div>
-    <h1>{{name}}</h1>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'App'
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>`,
-        '.gitignore': `# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?`
-      },
-      nuxt3: {
-        'package.json': {
-          name: '{{name}}',
-          private: true,
-          version: '0.0.0',
-          type: 'module',
-          scripts: {
-            dev: 'nuxt dev',
-            build: 'nuxt build',
-            generate: 'nuxt generate',
-            preview: 'nuxt preview'
-          },
-          dependencies: {
-            nuxt: '^3.0.0'
-          }
-        },
-        'nuxt.config.ts': `export default defineNuxtConfig({
-  devtools: { enabled: true }
-})`,
-        'app.vue': `<template>
-  <div>
-    <h1>{{name}}</h1>
-  </div>
-</template>`,
-        '.gitignore': `# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-
-# Node dependencies
-node_modules
-
-# Logs
-logs
-*.log
-
-# Misc
-.DS_Store
-.fleet
-.idea`
-      }
-    };
-
-    return baseFiles[templateName as keyof typeof baseFiles] || {};
-  }
-
-  /**
-   * 生成特性文件
    * @param targetDir 目标目录
    * @param features 选择的特性
    */
-  private async generateFeatureFiles(targetDir: string, features: Record<string, boolean>): Promise<void> {
-    const featureFiles = this.getFeatureFiles();
-    
-    for (const [feature, enabled] of Object.entries(features)) {
-      if (enabled && featureFiles[feature]) {
-        for (const [file, content] of Object.entries(featureFiles[feature])) {
-          const filePath = path.join(targetDir, file);
-          await fs.ensureDir(path.dirname(filePath));
-          
-          if (typeof content === 'string') {
-            await fs.writeFile(filePath, content);
-          } else {
-            await fs.writeJson(filePath, content, { spaces: 2 });
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * 获取特性文件
-   */
-  private getFeatureFiles(): Record<string, Record<string, any>> {
-    return {
-      typescript: {
-        'tsconfig.json': {
-          compilerOptions: {
-            target: 'ES2020',
-            useDefineForClassFields: true,
-            module: 'ESNext',
-            lib: ['ES2020', 'DOM', 'DOM.Iterable'],
-            skipLibCheck: true,
-            moduleResolution: 'bundler',
-            allowImportingTsExtensions: true,
-            resolveJsonModule: true,
-            isolatedModules: true,
-            noEmit: true,
-            jsx: 'preserve',
-            strict: true,
-            noUnusedLocals: true,
-            noUnusedParameters: true,
-            noFallthroughCasesInSwitch: true
-          },
-          include: ['src/**/*.ts', 'src/**/*.d.ts', 'src/**/*.tsx', 'src/**/*.vue'],
-          references: [{ path: './tsconfig.node.json' }]
-        },
-        'tsconfig.node.json': {
-          compilerOptions: {
-            composite: true,
-            skipLibCheck: true,
-            module: 'ESNext',
-            moduleResolution: 'bundler',
-            allowSyntheticDefaultImports: true
-          },
-          include: ['vite.config.ts']
-        },
-        'env.d.ts': `/// <reference types="vite/client" />
-
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
-}`,
-        'src/main.ts': `import { createApp } from 'vue'
-import App from './App.vue'
-
-createApp(App).mount('#app')`,
-        'src/App.vue': `<template>
-  <div>
-    <h1>{{name}}</h1>
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'App'
-})
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>`
-      },
-      jsx: {
-        'vite.config.js': `import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-
-export default defineConfig({
-  plugins: [vue(), vueJsx()],
-})`
-      },
-      router: {
-        'src/router/index.js': `import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Home
-    }
-  ]
-})
-
-export default router`,
-        'src/views/Home.vue': `<template>
-  <div class="home">
-    <h1>Home</h1>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'HomeView'
-}
-</script>`,
-        'src/main.js': `import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-
-const app = createApp(App)
-app.use(router)
-app.mount('#app')`,
-        'src/App.vue': `<template>
-  <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link>
-    </nav>
-    <router-view/>
-  </div>
-</template>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-  text-decoration: none;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>`
-      },
-      pinia: {
-        'src/stores/counter.js': `import { defineStore } from 'pinia'
-
-export const useCounterStore = defineStore('counter', {
-  state: () => ({
-    count: 0
-  }),
-  actions: {
-    increment() {
-      this.count++
-    }
-  }
-})`,
-        'src/main.js': `import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-
-const app = createApp(App)
-app.use(createPinia())
-app.mount('#app')`
-      },
-      vitest: {
-        'vitest.config.js': `import { defineConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
-
-export default defineConfig({
-  plugins: [vue()],
-  test: {
-    environment: 'jsdom'
-  }
-})`,
-        'src/components/__tests__/HelloWorld.spec.js': `import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import HelloWorld from '../HelloWorld.vue'
-
-describe('HelloWorld', () => {
-  it('renders properly', () => {
-    const wrapper = mount(HelloWorld, { props: { msg: 'Hello Vitest' } })
-    expect(wrapper.text()).toContain('Hello Vitest')
-  })
-})`
-      },
-      eslint: {
-        '.eslintrc.js': `module.exports = {
-  root: true,
-  env: {
-    node: true
-  },
-  extends: [
-    'plugin:vue/vue3-essential',
-    'eslint:recommended'
-  ],
-  parserOptions: {
-    ecmaVersion: 2020
-  },
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
-  }
-}`,
-        '.eslintignore': `dist
-node_modules`
-      },
-      prettier: {
-        '.prettierrc': `{
-  "semi": false,
-  "singleQuote": true,
-  "trailingComma": "none"
-}`,
-        '.prettierignore': `dist
-node_modules`
-      }
-    };
-  }
-
-  /**
-   * 处理package.json文件
-   * @param targetDir 目标目录
-   * @param templateName 模板名称
-   * @param features 选择的特性
-   * @param projectName 项目名称
-   */
-  private async processPackageJson(
-    targetDir: string,
+  private async processFeatures(
     templateName: string,
-    features: Record<string, boolean>,
-    projectName: string
+    targetDir: string,
+    features: Record<string, boolean>
   ): Promise<void> {
     const pkgPath = path.join(targetDir, 'package.json');
     if (!await fs.pathExists(pkgPath)) {
@@ -566,106 +196,463 @@ node_modules`
 
     const pkg = await fs.readJson(pkgPath);
     
-    // 设置项目名称
-    pkg.name = projectName;
+    // 处理依赖项
+    await this.processDependencies(templateName, targetDir, features, pkg);
     
-    // 根据特性添加依赖
-    if (features.typescript) {
-      pkg.devDependencies = {
-        ...pkg.devDependencies,
-        typescript: '^5.0.0',
-        '@types/node': '^18.0.0',
-        'vue-tsc': '^1.0.0'
-      };
-      
-      // 修改构建脚本
-      if (templateName === 'vue3') {
-        pkg.scripts.build = 'vue-tsc --noEmit && vite build';
+    // 处理配置文件
+    await this.processConfigFiles(templateName, targetDir, features);
+  }
+
+  /**
+   * 处理依赖项
+   * @param templateName 模板名称
+   * @param targetDir 目标目录
+   * @param features 选择的特性
+   * @param pkg package.json内容
+   */
+  private async processDependencies(
+    templateName: string,
+    targetDir: string,
+    features: Record<string, boolean>,
+    pkg: any
+  ): Promise<void> {
+    const pkgPath = path.join(targetDir, 'package.json');
+    
+    // Vue3模板特性处理
+    if (templateName === 'vue3') {
+      // 如果不需要JSX支持，移除相关依赖
+      if (!features.jsx) {
+        delete pkg.devDependencies['@vitejs/plugin-vue-jsx'];
+        // 同时修改vite.config.ts
+        await this.removeJsxFromViteConfig(targetDir);
       }
       
-      // 更新index.html中的入口
-      const indexPath = path.join(targetDir, 'index.html');
-      if (await fs.pathExists(indexPath)) {
-        let indexContent = await fs.readFile(indexPath, 'utf-8');
-        indexContent = indexContent.replace('src/main.js', 'src/main.ts');
-        await fs.writeFile(indexPath, indexContent);
+      // 如果不需要Pinia，移除相关依赖
+      if (!features.pinia) {
+        delete pkg.dependencies['pinia'];
+        // 同时移除stores目录
+        const storesDir = path.join(targetDir, 'src/stores');
+        if (await fs.pathExists(storesDir)) {
+          await fs.remove(storesDir);
+        }
+        // 修改main.ts，移除pinia相关代码
+        await this.removePiniaFromMainTs(targetDir);
       }
       
-      // 更新vite配置
-      const viteConfigPath = path.join(targetDir, 'vite.config.js');
-      if (await fs.pathExists(viteConfigPath)) {
-        await fs.rename(viteConfigPath, path.join(targetDir, 'vite.config.ts'));
-      }
-    }
-
-    if (features.jsx) {
-      pkg.devDependencies = {
-        ...pkg.devDependencies,
-        '@vitejs/plugin-vue-jsx': '^3.0.0'
-      };
-    }
-
-    if (features.router) {
-      pkg.dependencies = {
-        ...pkg.dependencies,
-        'vue-router': '^4.0.0'
-      };
-    }
-
-    if (features.pinia) {
-      pkg.dependencies = {
-        ...pkg.dependencies,
-        'pinia': '^2.0.0'
-      };
-    }
-
-    if (features.vitest) {
-      pkg.devDependencies = {
-        ...pkg.devDependencies,
-        'vitest': '^0.34.0',
-        '@vue/test-utils': '^2.4.0',
-        'jsdom': '^22.0.0'
-      };
-      pkg.scripts = {
-        ...pkg.scripts,
-        'test:unit': 'vitest'
-      };
-    }
-
-    if (features.eslint) {
-      pkg.devDependencies = {
-        ...pkg.devDependencies,
-        'eslint': '^8.0.0',
-        'eslint-plugin-vue': '^9.0.0'
-      };
-      
-      // 为TypeScript添加特定的ESLint配置
-      if (features.typescript) {
-        pkg.devDependencies = {
-          ...pkg.devDependencies,
-          '@typescript-eslint/parser': '^5.0.0',
-          '@typescript-eslint/eslint-plugin': '^5.0.0'
-        };
+      // 如果不需要Vue Router，移除相关依赖
+      if (!features.router) {
+        delete pkg.dependencies['vue-router'];
+        // 同时移除router目录和views目录
+        const routerDir = path.join(targetDir, 'src/router');
+        const viewsDir = path.join(targetDir, 'src/views');
+        if (await fs.pathExists(routerDir)) {
+          await fs.remove(routerDir);
+        }
+        if (await fs.pathExists(viewsDir)) {
+          await fs.remove(viewsDir);
+        }
+        // 修改main.ts，移除router相关代码
+        await this.removeRouterFromMainTs(targetDir);
       }
       
-      pkg.scripts = {
-        ...pkg.scripts,
-        'lint': 'eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore'
-      };
+      // 如果不需要UnoCSS，移除相关依赖
+      if (!features.unocss) {
+        delete pkg.devDependencies['unocss'];
+        // 同时移除uno.config.ts
+        const unoConfigPath = path.join(targetDir, 'uno.config.ts');
+        if (await fs.pathExists(unoConfigPath)) {
+          await fs.remove(unoConfigPath);
+        }
+        // 修改vite.config.ts，移除UnoCSS相关代码
+        await this.removeUnoFromViteConfig(targetDir);
+        // 修改main.ts，移除UnoCSS相关导入
+        await this.removeUnoFromMainTs(targetDir);
+      }
+      
+      // 如果不需要Vitest，移除相关依赖
+      if (!features.vitest) {
+        delete pkg.devDependencies['vitest'];
+        delete pkg.devDependencies['@vue/test-utils'];
+        delete pkg.devDependencies['jsdom'];
+        delete pkg.scripts['test:unit'];
+        // 同时移除vitest.config.ts
+        const vitestConfigPath = path.join(targetDir, 'vitest.config.ts');
+        if (await fs.pathExists(vitestConfigPath)) {
+          await fs.remove(vitestConfigPath);
+        }
+        // 移除tsconfig.vitest.json
+        const tsVitestPath = path.join(targetDir, 'tsconfig.vitest.json');
+        if (await fs.pathExists(tsVitestPath)) {
+          await fs.remove(tsVitestPath);
+        }
+      }
+      
+      // 如果不需要Auto Import，移除相关依赖
+      if (!features['auto-import']) {
+        delete pkg.devDependencies['unplugin-auto-import'];
+        // 修改vite.config.ts，移除Auto Import相关代码
+        await this.removeAutoImportFromViteConfig(targetDir);
+        // 移除auto-import.d.ts
+        const autoImportDtsPath = path.join(targetDir, 'src/auto-import.d.ts');
+        if (await fs.pathExists(autoImportDtsPath)) {
+          await fs.remove(autoImportDtsPath);
+        }
+      }
+      
+      // 如果不需要Components，移除相关依赖
+      if (!features.components) {
+        delete pkg.devDependencies['unplugin-vue-components'];
+        // 修改vite.config.ts，移除Components相关代码
+        await this.removeComponentsFromViteConfig(targetDir);
+        // 移除components.d.ts
+        const componentsDtsPath = path.join(targetDir, 'components.d.ts');
+        if (await fs.pathExists(componentsDtsPath)) {
+          await fs.remove(componentsDtsPath);
+        }
+      }
     }
-
-    if (features.prettier) {
-      pkg.devDependencies = {
-        ...pkg.devDependencies,
-        'prettier': '^2.0.0'
-      };
-      pkg.scripts = {
-        ...pkg.scripts,
-        'format': 'prettier --write src/'
-      };
+    
+    // Nuxt3模板特性处理
+    else if (templateName === 'nuxt3') {
+      // 如果不需要UnoCSS，移除相关依赖
+      if (!features.unocss) {
+        delete pkg.devDependencies['unocss'];
+        delete pkg.devDependencies['@unocss/nuxt'];
+        // 同时移除uno.config.ts
+        const unoConfigPath = path.join(targetDir, 'uno.config.ts');
+        if (await fs.pathExists(unoConfigPath)) {
+          await fs.remove(unoConfigPath);
+        }
+        // 修改nuxt.config.ts，移除UnoCSS相关代码
+        await this.removeUnoFromNuxtConfig(targetDir);
+      }
+      
+      // 如果不需要Sass，移除相关依赖
+      if (!features.sass) {
+        delete pkg.devDependencies['sass'];
+      }
+      
+      // 如果不需要VueUse，移除相关依赖
+      if (!features.vueuse) {
+        delete pkg.devDependencies['@vueuse/core'];
+        delete pkg.devDependencies['@vueuse/nuxt'];
+        // 修改nuxt.config.ts，移除VueUse相关代码
+        await this.removeVueUseFromNuxtConfig(targetDir);
+      }
+      
+      // 如果不需要Nuxt Image，移除相关依赖
+      if (!features['nuxt-image']) {
+        delete pkg.dependencies['@nuxt/image'];
+        // 修改nuxt.config.ts，移除Nuxt Image相关代码
+        await this.removeNuxtImageFromNuxtConfig(targetDir);
+      }
+      
+      // 如果不需要Auto Import，修改nuxt.config.ts
+      if (!features['auto-import']) {
+        delete pkg.devDependencies['unplugin-auto-import'];
+        // 修改nuxt.config.ts，移除Auto Import相关代码
+        await this.removeAutoImportFromNuxtConfig(targetDir);
+      }
+      
+      // 如果不需要Components，修改nuxt.config.ts
+      if (!features.components) {
+        delete pkg.devDependencies['unplugin-vue-components'];
+        // 修改nuxt.config.ts，移除Components相关代码
+        await this.removeComponentsFromNuxtConfig(targetDir);
+      }
     }
-
+    
+    // 保存修改后的package.json
     await fs.writeJson(pkgPath, pkg, { spaces: 2 });
+  }
+
+  /**
+   * 处理配置文件
+   * @param templateName 模板名称
+   * @param targetDir 目标目录
+   * @param features 选择的特性
+   */
+  private async processConfigFiles(
+    templateName: string,
+    targetDir: string,
+    features: Record<string, boolean>
+  ): Promise<void> {
+    // 这里可以根据需要进一步处理配置文件
+    // 目前大部分配置文件处理已经在processDependencies中完成
+  }
+
+  /**
+   * 从Vite配置中移除JSX支持
+   * @param targetDir 目标目录
+   */
+  private async removeJsxFromViteConfig(targetDir: string): Promise<void> {
+    const viteConfigPath = path.join(targetDir, 'vite.config.ts');
+    if (!await fs.pathExists(viteConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(viteConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import vueJsx from ['"]@vitejs\/plugin-vue-jsx['"][\r\n]/g, '');
+    
+    // 移除插件配置
+    content = content.replace(/vueJsx\(\),[\r\n]/g, '');
+    
+    await fs.writeFile(viteConfigPath, content);
+  }
+
+  /**
+   * 从main.ts中移除Pinia相关代码
+   * @param targetDir 目标目录
+   */
+  private async removePiniaFromMainTs(targetDir: string): Promise<void> {
+    const mainTsPath = path.join(targetDir, 'src/main.ts');
+    if (!await fs.pathExists(mainTsPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(mainTsPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import { createPinia } from ['"]pinia['"][\r\n]/g, '');
+    
+    // 移除pinia使用
+    content = content.replace(/app\.use\(createPinia\(\)\)[\r\n]/g, '');
+    
+    await fs.writeFile(mainTsPath, content);
+  }
+
+  /**
+   * 从main.ts中移除Router相关代码
+   * @param targetDir 目标目录
+   */
+  private async removeRouterFromMainTs(targetDir: string): Promise<void> {
+    const mainTsPath = path.join(targetDir, 'src/main.ts');
+    if (!await fs.pathExists(mainTsPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(mainTsPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import router from ['"]\.\/router['"][\r\n]/g, '');
+    
+    // 移除router使用
+    content = content.replace(/app\.use\(router\)[\r\n]/g, '');
+    
+    await fs.writeFile(mainTsPath, content);
+  }
+
+  /**
+   * 从Vite配置中移除UnoCSS
+   * @param targetDir 目标目录
+   */
+  private async removeUnoFromViteConfig(targetDir: string): Promise<void> {
+    const viteConfigPath = path.join(targetDir, 'vite.config.ts');
+    if (!await fs.pathExists(viteConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(viteConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import UnoCSS from ['"]unocss\/vite['"][\r\n]/g, '');
+    
+    // 移除插件配置
+    content = content.replace(/UnoCSS\(\),[\r\n]/g, '');
+    
+    await fs.writeFile(viteConfigPath, content);
+  }
+
+  /**
+   * 从main.ts中移除UnoCSS相关导入
+   * @param targetDir 目标目录
+   */
+  private async removeUnoFromMainTs(targetDir: string): Promise<void> {
+    const mainTsPath = path.join(targetDir, 'src/main.ts');
+    if (!await fs.pathExists(mainTsPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(mainTsPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import ['"]uno\.css['"][\r\n]/g, '');
+    content = content.replace(/import ['"]@unocss\/reset\/tailwind\.css['"][\r\n]/g, '');
+    
+    await fs.writeFile(mainTsPath, content);
+  }
+
+  /**
+   * 从Vite配置中移除Auto Import
+   * @param targetDir 目标目录
+   */
+  private async removeAutoImportFromViteConfig(targetDir: string): Promise<void> {
+    const viteConfigPath = path.join(targetDir, 'vite.config.ts');
+    if (!await fs.pathExists(viteConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(viteConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import AutoImport from ['"]unplugin-auto-import\/vite['"][\r\n]/g, '');
+    
+    // 移除插件配置 (这是一个简化的实现，可能需要更复杂的正则表达式来匹配多行配置)
+    content = content.replace(/AutoImport\(\{[\s\S]*?\}\),[\r\n]/g, '');
+    
+    await fs.writeFile(viteConfigPath, content);
+  }
+
+  /**
+   * 从Vite配置中移除Components
+   * @param targetDir 目标目录
+   */
+  private async removeComponentsFromViteConfig(targetDir: string): Promise<void> {
+    const viteConfigPath = path.join(targetDir, 'vite.config.ts');
+    if (!await fs.pathExists(viteConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(viteConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import Components from ['"]unplugin-vue-components\/vite['"][\r\n]/g, '');
+    
+    // 移除插件配置
+    content = content.replace(/Components\(\{[\s\S]*?\}\),[\r\n]/g, '');
+    
+    await fs.writeFile(viteConfigPath, content);
+  }
+
+  /**
+   * 从Nuxt配置中移除UnoCSS
+   * @param targetDir 目标目录
+   */
+  private async removeUnoFromNuxtConfig(targetDir: string): Promise<void> {
+    const nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 从modules数组中移除@unocss/nuxt
+    content = content.replace(/['"]@unocss\/nuxt['"],?\s*/g, '');
+    
+    await fs.writeFile(nuxtConfigPath, content);
+  }
+
+  /**
+   * 从Nuxt配置中移除VueUse
+   * @param targetDir 目标目录
+   */
+  private async removeVueUseFromNuxtConfig(targetDir: string): Promise<void> {
+    const nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 从modules数组中移除@vueuse/nuxt
+    content = content.replace(/['"]@vueuse\/nuxt['"],?\s*/g, '');
+    
+    await fs.writeFile(nuxtConfigPath, content);
+  }
+
+  /**
+   * 从Nuxt配置中移除Nuxt Image
+   * @param targetDir 目标目录
+   */
+  private async removeNuxtImageFromNuxtConfig(targetDir: string): Promise<void> {
+    const nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 从modules数组中移除@nuxt/image
+    content = content.replace(/['"]@nuxt\/image['"],?\s*/g, '');
+    
+    await fs.writeFile(nuxtConfigPath, content);
+  }
+
+  /**
+   * 从Nuxt配置中移除Auto Import
+   * @param targetDir 目标目录
+   */
+  private async removeAutoImportFromNuxtConfig(targetDir: string): Promise<void> {
+    const nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import AutoImport from ['"]unplugin-auto-import\/vite['"][\r\n]/g, '');
+    
+    // 移除vite.plugins中的配置
+    content = content.replace(/AutoImport\(\{[\s\S]*?\}\),[\r\n]/g, '');
+    
+    await fs.writeFile(nuxtConfigPath, content);
+  }
+
+  /**
+   * 从Nuxt配置中移除Components
+   * @param targetDir 目标目录
+   */
+  private async removeComponentsFromNuxtConfig(targetDir: string): Promise<void> {
+    const nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      return;
+    }
+
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 移除import
+    content = content.replace(/import Components from ['"]unplugin-vue-components\/vite['"][\r\n]/g, '');
+    
+    // 移除vite.plugins中的配置
+    content = content.replace(/Components\(\{[\s\S]*?\}\),[\r\n]/g, '');
+    
+    await fs.writeFile(nuxtConfigPath, content);
+  }
+
+  /**
+   * 处理项目名称
+   * @param targetDir 目标目录
+   * @param projectName 项目名称
+   */
+  private async processProjectName(targetDir: string, projectName: string): Promise<void> {
+    const pkgPath = path.join(targetDir, 'package.json');
+    if (!await fs.pathExists(pkgPath)) {
+      return;
+    }
+
+    const pkg = await fs.readJson(pkgPath);
+    pkg.name = projectName;
+    await fs.writeJson(pkgPath, pkg, { spaces: 2 });
+
+    // 处理HTML文件中的标题
+    const indexHtmlPath = path.join(targetDir, 'index.html');
+    if (await fs.pathExists(indexHtmlPath)) {
+      let content = await fs.readFile(indexHtmlPath, 'utf-8');
+      content = content.replace(/<title>.*?<\/title>/g, `<title>${projectName}</title>`);
+      await fs.writeFile(indexHtmlPath, content);
+    }
+
+    // 处理README.md
+    const readmePath = path.join(targetDir, 'README.md');
+    if (await fs.pathExists(readmePath)) {
+      let content = await fs.readFile(readmePath, 'utf-8');
+      // 替换第一行的标题
+      content = content.replace(/^#\s+.*$/m, `# ${projectName}`);
+      await fs.writeFile(readmePath, content);
+    }
   }
 
   /**
@@ -675,14 +662,7 @@ node_modules`
    */
   getTemplateCommands(templateName: string): { installCmd: string, startCmd: string } {
     const installCmd = 'npm install';
-    let startCmd = 'npm start';
-    
-    // 针对特定模板的默认命令
-    if (templateName === 'nuxt3') {
-      startCmd = 'npm run dev';
-    } else if (templateName === 'vue3') {
-      startCmd = 'npm run dev';
-    }
+    let startCmd = 'npm run dev';
     
     return { installCmd, startCmd };
   }
