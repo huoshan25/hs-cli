@@ -585,38 +585,15 @@ async function processTemplateFiles(templateDir: string, targetDir: string, feat
 }
 
 // 获取模板的默认启动命令
-function getTemplateCommands(templateName: string, pkgExists: boolean, pkg: any = null, hasLockFile: string | null = null) {
-  let installCmd = 'npm install';
+function getTemplateCommands(templateName: string, pkgExists: boolean, pkg: any = null) {
+  const installCmd = 'npm install';
   let startCmd = 'npm start';
-  
-  // 根据锁文件判断包管理器
-  if (hasLockFile === 'pnpm') {
-    installCmd = 'pnpm install';
-  } else if (hasLockFile === 'yarn') {
-    installCmd = 'yarn';
-  }
   
   // 针对特定模板的默认命令
   if (templateName === 'nuxt3') {
-    startCmd = installCmd.startsWith('pnpm') ? 'pnpm dev' : 
-              installCmd.startsWith('yarn') ? 'yarn dev' : 'npm run dev';
+    startCmd = 'npm run dev';
   } else if (templateName === 'vue3') {
-    startCmd = installCmd.startsWith('pnpm') ? 'pnpm dev' : 
-              installCmd.startsWith('yarn') ? 'yarn dev' : 'npm run dev';
-  }
-  
-  // 如果有package.json，根据scripts字段确定启动命令
-  if (pkgExists && pkg && pkg.scripts) {
-    if (pkg.scripts.dev) {
-      startCmd = installCmd.startsWith('pnpm') ? 'pnpm dev' : 
-                installCmd.startsWith('yarn') ? 'yarn dev' : 'npm run dev';
-    } else if (pkg.scripts.serve) {
-      startCmd = installCmd.startsWith('pnpm') ? 'pnpm serve' : 
-                installCmd.startsWith('yarn') ? 'yarn serve' : 'npm run serve';
-    } else if (pkg.scripts.start) {
-      startCmd = installCmd.startsWith('pnpm') ? 'pnpm start' : 
-                installCmd.startsWith('yarn') ? 'yarn start' : 'npm run start';
-    }
+    startCmd = 'npm run dev';
   }
   
   return { installCmd, startCmd };
@@ -786,21 +763,14 @@ export function createCommand(program: Command): void {
 
         console.log(chalk.green(`\n✨ 项目 ${chalk.bold(projectName)} 创建成功！\n`));
         
-        // 确定项目使用的包管理器
-        let hasLockFile = null;
-        if (fs.existsSync(path.join(targetDir, 'pnpm-lock.yaml'))) {
-          hasLockFile = 'pnpm';
-        } else if (fs.existsSync(path.join(targetDir, 'yarn.lock'))) {
-          hasLockFile = 'yarn';
-        }
-        
         // 获取正确的启动命令
-        const { installCmd, startCmd } = getTemplateCommands(selectedTemplate, pkgExists, pkg, hasLockFile);
+        const { installCmd, startCmd } = getTemplateCommands(selectedTemplate, pkgExists, pkg);
         
         console.log(chalk.cyan(`接下来你可以运行以下命令：\n`));
         console.log(chalk.white(`  cd ${projectName}`));
         console.log(chalk.white(`  ${installCmd}`));
         console.log(chalk.white(`  ${startCmd}\n`));
+        console.log(chalk.yellow(`提示: 您也可以使用 pnpm 或 yarn 作为包管理器\n`));
         console.log(chalk.yellow('愉快地编码吧! 🎉\n'));
       } catch (error: any) {
         console.error(chalk.red(formatLog(`创建项目失败：${error.message}`, 'error')));
