@@ -1,6 +1,6 @@
 {
   "name": "hs-cli",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
   "description": "火山 CLI node脚手架工具",
   "main": "dist/index.js",
@@ -19,12 +19,7 @@
     "build:all": "pnpm -r run build",
     "publish:utils": "cd packages/utils && pnpm publish --no-git-checks",
     "publish:cli": "cd apps/hs-cli && pnpm publish --no-git-checks",
-    "publish:all": "pnpm run publish:utils && pnpm run publish:cli",
-    "release": "standard-version",
-    "release:major": "standard-version --release-as major",
-    "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "release:first": "standard-version --first-release"
+    "publish:all": "pnpm run publish:utils && pnpm run publish:cli"
   },
   "dependencies": {
     "@huo-shan/utils": "workspace:*",
