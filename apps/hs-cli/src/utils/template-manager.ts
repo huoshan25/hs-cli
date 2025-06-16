@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
+import * as ts from 'typescript';
 
 /**
  * 模板特性配置接口
@@ -209,6 +210,12 @@ export class TemplateManager {
     
     // Vue3模板特性处理
     if (templateName === 'vue3') {
+      // 如果不需要TypeScript，处理相关文件
+      if (!features.typescript) {
+        // 处理TypeScript相关文件
+        await this.handleTypescriptFiles(targetDir);
+      }
+      
       // 如果不需要JSX支持，移除相关依赖
       if (!features.jsx) {
         delete pkg.devDependencies['@vitejs/plugin-vue-jsx'];
@@ -303,6 +310,12 @@ export class TemplateManager {
     
     // Nuxt3模板特性处理
     else if (templateName === 'nuxt3') {
+      // 如果不需要TypeScript，处理相关文件
+      if (!features.typescript) {
+        // 处理TypeScript相关文件
+        await this.handleTypescriptFiles(targetDir);
+      }
+      
       // 如果不需要UnoCSS，移除相关依赖
       if (!features.unocss) {
         delete pkg.devDependencies['unocss'];
@@ -654,5 +667,162 @@ export class TemplateManager {
     let startCmd = 'npm run dev';
     
     return { installCmd, startCmd };
+  }
+
+  /**
+   * 处理TypeScript相关文件
+   * @param targetDir 目标目录
+   */
+  private async handleTypescriptFiles(targetDir: string): Promise<void> {
+    // 1. 修改package.json，移除TypeScript相关依赖
+    const pkgPath = path.join(targetDir, 'package.json');
+    if (await fs.pathExists(pkgPath)) {
+      const pkg = await fs.readJson(pkgPath);
+      
+      // 移除TypeScript相关依赖
+      delete pkg.devDependencies['typescript'];
+      delete pkg.devDependencies['vue-tsc'];
+      
+      // 修改scripts，将带有typescript的命令替换为js版本
+      if (pkg.scripts) {
+        if (pkg.scripts.type) {
+          delete pkg.scripts.type;
+        }
+        
+        if (pkg.scripts.build) {
+          pkg.scripts.build = pkg.scripts.build.replace('vue-tsc', '');
+        }
+        
+        // 替换其他可能包含ts的脚本
+        Object.keys(pkg.scripts).forEach(key => {
+          if (pkg.scripts[key].includes('.ts')) {
+            pkg.scripts[key] = pkg.scripts[key].replace('.ts', '.js');
+          }
+        });
+      }
+      
+      await fs.writeJson(pkgPath, pkg, { spaces: 2 });
+    }
+    
+    // 2. 转换配置文件扩展名
+    const configFiles = [
+      'vite.config.ts',
+      'uno.config.ts',
+      'vitest.config.ts'
+    ];
+    
+    for (const file of configFiles) {
+      const tsPath = path.join(targetDir, file);
+      if (await fs.pathExists(tsPath)) {
+        const jsPath = tsPath.replace('.ts', '.js');
+        const content = await fs.readFile(tsPath, 'utf-8');
+        
+        // 使用TypeScript编译器API转换代码
+        const jsContent = this.transpileTsToJs(content);
+        
+        await fs.writeFile(jsPath, jsContent);
+        await fs.remove(tsPath);
+      }
+    }
+    
+    // 3. 转换src目录下的ts文件
+    await this.convertTsToJsInDir(path.join(targetDir, 'src'));
+    
+    // 4. 移除TypeScript配置文件
+    const tsConfigFiles = [
+      'tsconfig.json',
+      'tsconfig.app.json',
+      'tsconfig.node.json',
+      'tsconfig.vitest.json',
+      'env.d.ts'
+    ];
+    
+    for (const file of tsConfigFiles) {
+      const filePath = path.join(targetDir, file);
+      if (await fs.pathExists(filePath)) {
+        await fs.remove(filePath);
+      }
+    }
+    
+    // 5. 移除components.d.ts和auto-import.d.ts
+    const dtsFiles = [
+      'components.d.ts',
+      path.join('src', 'auto-import.d.ts')
+    ];
+    
+    for (const file of dtsFiles) {
+      const filePath = path.join(targetDir, file);
+      if (await fs.pathExists(filePath)) {
+        await fs.remove(filePath);
+      }
+    }
+  }
+  
+  /**
+   * 递归转换目录下的所有.ts文件为.js文件
+   * @param dirPath 目录路径
+   */
+  private async convertTsToJsInDir(dirPath: string): Promise<void> {
+    if (!await fs.pathExists(dirPath)) {
+      return;
+    }
+    
+    const entries = await fs.readdir(dirPath, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      
+      if (entry.isDirectory()) {
+        // 递归处理子目录
+        await this.convertTsToJsInDir(fullPath);
+      } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
+        // 处理.ts文件（排除.d.ts文件）
+        const jsPath = fullPath.replace('.ts', '.js');
+        const content = await fs.readFile(fullPath, 'utf-8');
+        
+        // 使用TypeScript编译器API转换代码
+        const jsContent = this.transpileTsToJs(content);
+        
+        await fs.writeFile(jsPath, jsContent);
+        await fs.remove(fullPath);
+      }
+    }
+  }
+
+  /**
+   * 使用TypeScript编译器API将TypeScript代码转换为JavaScript代码
+   * @param source TypeScript源代码
+   * @returns 转换后的JavaScript代码
+   */
+  private transpileTsToJs(source: string): string {
+    // 设置编译选项
+    const compilerOptions: ts.CompilerOptions = {
+      target: ts.ScriptTarget.ES2020,
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs,
+      esModuleInterop: true,
+      removeComments: false,
+      strict: false,
+      skipLibCheck: true
+    };
+    
+    // 使用TypeScript编译器API转换代码
+    const result = ts.transpileModule(source, {
+      compilerOptions,
+      reportDiagnostics: false
+    });
+    
+    // 返回转换后的JavaScript代码
+    return result.outputText;
+  }
+
+  /**
+   * 移除TypeScript类型注解
+   * @param content 文件内容
+   * @returns 处理后的内容
+   */
+  private removeTypeAnnotations(content: string): string {
+    // 使用TypeScript编译器API转换代码，替代原来的正则表达式方法
+    return this.transpileTsToJs(content);
   }
 } 
