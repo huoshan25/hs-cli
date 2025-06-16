@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.34](https://github.com/huoshan25/hs-cli/compare/v0.1.33...v0.1.34) (2025-06-16)
+
+
+### 🔨 Chores
+
+* **cli:** 添加标准版本发布命令以支持版本管理 ([9b805e1](https://github.com/huoshan25/hs-cli/commit/9b805e130a965b7641a657387950ca255f9a82e0))
+* **package:** 将版本号更新为 0.0.0，移除多余的发布命令 ([6b2b168](https://github.com/huoshan25/hs-cli/commit/6b2b168a9414772993758d7f0ec48d2b1c1f24ce))
+
+
+### ✨ Features
+
+* **cli:** 添加版本管理配置文件和发布命令，更新依赖项 ([f5c0599](https://github.com/huoshan25/hs-cli/commit/f5c0599aa9d13e716a27177e2734a1086531cabd))
+* **cli:** 重构模板管理，新增模板工厂和处理器，移除旧的模板管理器 ([6a04ce1](https://github.com/huoshan25/hs-cli/commit/6a04ce193275bd81888a96f29ce4aa716cb786e5))
+
 ### 0.1.33 (2025-06-16)
 
 

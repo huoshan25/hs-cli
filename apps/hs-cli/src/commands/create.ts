@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import cliProgress from 'cli-progress';
 import { formatLog, validateName } from '@huo-shan/utils';
-import { TemplateManager } from '../utils/template-manager';
+import { TemplateFactory } from '../templates-handler';
 
 export function createCommand(program: Command): void {
   program
@@ -25,11 +25,11 @@ export function createCommand(program: Command): void {
           hideCursor: true
         });
         
-        // 创建模板管理器
-        const templateManager = new TemplateManager(path.resolve(__dirname, '../templates'));
+        // 创建模板工厂，指定模板文件目录
+        const templateFactory = new TemplateFactory(path.resolve(__dirname, '../templates'));
         
         // 1. 先选择模板
-        const availableTemplates = await templateManager.getAvailableTemplates();
+        const availableTemplates = templateFactory.getAvailableTemplates();
         
         if (availableTemplates.length === 0) {
           console.log(chalk.red('错误：未找到可用的项目模板'));
@@ -52,9 +52,16 @@ export function createCommand(program: Command): void {
         
         console.log(chalk.green(`✓ 已选择: ${selectedTemplate === 'vue3' ? 'Vue.js' : 'Nuxt.js'}\n`));
 
+        // 获取选定模板的处理器
+        const templateHandler = templateFactory.getHandler(selectedTemplate);
+        if (!templateHandler) {
+          console.log(chalk.red(`错误：未找到模板 ${selectedTemplate} 的处理器`));
+          return;
+        }
+
         // 2. 选择模板特性
         console.log(chalk.yellow('✨ 第 2 步：选择项目特性'));
-        const features = templateManager.getTemplateFeatures(selectedTemplate);
+        const features = templateHandler.getFeatures();
         const { selectedFeatures } = await inquirer.prompt([
           {
             type: 'checkbox',
@@ -142,7 +149,7 @@ export function createCommand(program: Command): void {
         
         // 更新进度并处理模板
         progressBar.update(30, { step: '处理项目模板...' });
-        await templateManager.processTemplate(selectedTemplate, targetDir, featuresObj, projectName);
+        await templateHandler.processTemplate(targetDir, featuresObj, projectName);
         
         // 完成进度
         progressBar.update(100, { step: '项目创建完成!' });
@@ -151,7 +158,7 @@ export function createCommand(program: Command): void {
         console.log(chalk.green(`\n✨ 项目 ${chalk.bold(projectName)} 创建成功！\n`));
         
         // 获取正确的启动命令
-        const { installCmd, startCmd } = templateManager.getTemplateCommands(selectedTemplate);
+        const { installCmd, startCmd } = templateHandler.getCommands();
         
         console.log(chalk.cyan(`接下来你可以运行以下命令：\n`));
         console.log(chalk.white(`  cd ${projectName}`));
