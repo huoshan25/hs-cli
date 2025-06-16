@@ -18,14 +18,6 @@
     {
       "filename": "package.json",
       "type": "json"
-    },
-    {
-      "filename": "apps/hs-cli/package.json",
-      "type": "json"
-    },
-    {
-      "filename": "packages/utils/package.json",
-      "type": "json"
     }
   ]
 } 
