@@ -314,6 +314,18 @@ export class TemplateManager {
       if (!features.typescript) {
         // 处理TypeScript相关文件
         await this.handleTypescriptFiles(targetDir);
+        
+        // Nuxt3特殊处理：保留某些TypeScript依赖以避免运行时错误
+        // 因为Nuxt3内部依赖TypeScript，即使用户选择不使用TypeScript
+        if (!pkg.devDependencies) {
+          pkg.devDependencies = {};
+        }
+        
+        // 确保这些依赖存在，以避免运行时错误
+        pkg.devDependencies['typescript'] = '^5.0.0';
+        pkg.devDependencies['vue-tsc'] = '^1.0.0';
+        
+        await this.disableTypeCheckInNuxtConfig(targetDir);
       }
       
       // 如果不需要UnoCSS，移除相关依赖
@@ -708,7 +720,8 @@ export class TemplateManager {
     const configFiles = [
       'vite.config.ts',
       'uno.config.ts',
-      'vitest.config.ts'
+      'vitest.config.ts',
+      'nuxt.config.ts'
     ];
     
     for (const file of configFiles) {
@@ -824,5 +837,42 @@ export class TemplateManager {
   private removeTypeAnnotations(content: string): string {
     // 使用TypeScript编译器API转换代码，替代原来的正则表达式方法
     return this.transpileTsToJs(content);
+  }
+
+  /**
+   * 在Nuxt配置中禁用TypeScript检查
+   * @param targetDir 目标目录
+   */
+  private async disableTypeCheckInNuxtConfig(targetDir: string): Promise<void> {
+    // 检查nuxt.config.ts或nuxt.config.js是否存在
+    let nuxtConfigPath = path.join(targetDir, 'nuxt.config.ts');
+    let isTs = true;
+    
+    if (!await fs.pathExists(nuxtConfigPath)) {
+      nuxtConfigPath = path.join(targetDir, 'nuxt.config.js');
+      isTs = false;
+      
+      if (!await fs.pathExists(nuxtConfigPath)) {
+        return; // 如果配置文件不存在，直接返回
+      }
+    }
+    
+    // 读取配置文件
+    let content = await fs.readFile(nuxtConfigPath, 'utf-8');
+    
+    // 添加TypeScript检查禁用配置
+    if (content.includes('export default defineNuxtConfig(')) {
+      // 如果已经有配置对象，在其中添加typeCheck: false
+      content = content.replace(
+        'export default defineNuxtConfig({',
+        'export default defineNuxtConfig({\n  typescript: { typeCheck: false },\n'
+      );
+    } else {
+      // 如果没有找到配置对象，尝试在文件末尾添加
+      content += `\n\n// 禁用TypeScript检查以提高开发性能\nexport default defineNuxtConfig({\n  typescript: { typeCheck: false }\n});\n`;
+    }
+    
+    // 写回文件
+    await fs.writeFile(nuxtConfigPath, content);
   }
 } 
