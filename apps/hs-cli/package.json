@@ -23,7 +23,12 @@
     "lint": "eslint src --ext .ts",
     "cli:create": "node bin/hs-cli.js create",
     "cli:generate": "node bin/hs-cli.js generate",
-    "cli:init": "node bin/hs-cli.js init"
+    "cli:init": "node bin/hs-cli.js init",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:first": "standard-version --first-release"
   },
   "dependencies": {
     "@huo-shan/utils": "workspace:*",
