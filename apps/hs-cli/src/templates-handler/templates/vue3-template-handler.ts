@@ -316,4 +316,30 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
     
     await fs.writeFile(viteConfigPath, content);
   }
-} 
+
+  /**
+   * 转换Vue3特定的配置文件扩展名
+   * @param targetDir 目标目录
+   */
+  protected async convertConfigFiles(targetDir: string): Promise<void> {
+    const configFiles = [
+      'vite.config.ts',
+      'uno.config.ts',
+      'vitest.config.ts'
+    ];
+
+    for (const file of configFiles) {
+      const tsPath = path.join(targetDir, file);
+      if (await fs.pathExists(tsPath)) {
+        const jsPath = tsPath.replace('.ts', '.js');
+        const content = await fs.readFile(tsPath, 'utf-8');
+
+        // 使用TypeScript编译器API转换代码
+        const jsContent = this.transpileTsToJs(content);
+
+        await fs.writeFile(jsPath, jsContent);
+        await fs.remove(tsPath);
+      }
+    }
+  }
+}

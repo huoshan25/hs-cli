@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.36](https://github.com/huoshan25/hs-cli/compare/v0.1.35...v0.1.36) (2025-06-18)
+
+
+### 🔨 Chores
+
+* 调整 ([af1ddd7](https://github.com/huoshan25/hs-cli/commit/af1ddd7cf6790abe02b593c504a99852afd2de2d))
+* 删除重复记录 ([8e5de48](https://github.com/huoshan25/hs-cli/commit/8e5de48a8c5b684d4a31e2f7eefd79c499bc95d9))
+
+
+### ♻️ Code Refactoring
+
+* **hs-cli:** 重构配置文件处理逻辑(BaseTemplateHandler) ([7b7993c](https://github.com/huoshan25/hs-cli/commit/7b7993cd9be9245b2f3fc49e3497021714aabc10))
+
 ### [0.1.35](https://github.com/huoshan25/hs-cli/compare/v0.1.33...v0.1.35) (2025-06-16)
 
 
