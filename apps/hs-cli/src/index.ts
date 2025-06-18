@@ -5,6 +5,8 @@ import chalk from 'chalk';
 import { createCommand } from './commands/create';
 import { generateCommand } from './commands/generate';
 import { initCommand } from './commands/init';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * 创建程序实例
@@ -12,12 +14,20 @@ import { initCommand } from './commands/init';
 const program = new Command();
 
 /**
+ * 获取package.json中的版本号
+ */
+const packageJson = JSON.parse(
+  readFileSync(join(__dirname, '../package.json'), 'utf-8')
+);
+const version = packageJson.version || '0.0.0';
+
+/**
  * 设置CLI基本信息
  */
 program
   .name('create-hs-cli')
   .description('一个用于快速生成项目脚手架的CLI工具')
-  .version('0.1.35', '-v, --version', '显示当前版本');
+  .version(version, '-v, --version', '显示当前版本');
 
 /**
  * 注册命令
