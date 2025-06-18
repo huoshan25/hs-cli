@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.37](https://github.com/huoshan25/hs-cli/compare/v0.1.36...v0.1.37) (2025-06-18)
+
+
+### 👷 Build System
+
+* **hs-cli:** 将 typescript 从 devDependencies 移至 dependencies ([ad09a22](https://github.com/huoshan25/hs-cli/commit/ad09a22dfd8fe20e9a8404c828f5d3e409071f15))
+
 ### [0.1.36](https://github.com/huoshan25/hs-cli/compare/v0.1.35...v0.1.36) (2025-06-18)
 
 
