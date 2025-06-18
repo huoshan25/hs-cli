@@ -268,4 +268,47 @@ export class Nuxt3TemplateHandler extends BaseTemplateHandler {
     
     await fs.writeFile(nuxtConfigPath, content);
   }
-} 
+
+  /**
+   * 转换Nuxt3特定的配置文件扩展名
+   * @param targetDir 目标目录
+   */
+  protected async convertConfigFiles(targetDir: string): Promise<void> {
+    const configFiles = [
+      'nuxt.config.ts',
+      'uno.config.ts'
+    ];
+
+    for (const file of configFiles) {
+      const tsPath = path.join(targetDir, file);
+      if (await fs.pathExists(tsPath)) {
+        const jsPath = tsPath.replace('.ts', '.js');
+        const content = await fs.readFile(tsPath, 'utf-8');
+
+        // 使用TypeScript编译器API转换代码
+        const jsContent = this.transpileTsToJs(content);
+
+        await fs.writeFile(jsPath, jsContent);
+        await fs.remove(tsPath);
+      }
+    }
+  }
+
+  /**
+   * 重写移除TypeScript配置文件方法，处理Nuxt3特定的配置
+   * @param targetDir 目标目录
+   */
+  protected async removeTypeScriptConfigFiles(targetDir: string): Promise<void> {
+    // Nuxt3只有一个tsconfig.json
+    const tsConfigFiles = [
+      'tsconfig.json'
+    ];
+
+    for (const file of tsConfigFiles) {
+      const filePath = path.join(targetDir, file);
+      if (await fs.pathExists(filePath)) {
+        await fs.remove(filePath);
+      }
+    }
+  }
+}

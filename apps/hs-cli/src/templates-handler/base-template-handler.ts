@@ -140,46 +140,14 @@ export abstract class BaseTemplateHandler implements TemplateHandler {
       await fs.writeJson(pkgPath, pkg, { spaces: 2 });
     }
     
-    // 2. 转换配置文件扩展名
-    const configFiles = [
-      'vite.config.ts',
-      'uno.config.ts',
-      'vitest.config.ts',
-      'nuxt.config.ts'
-    ];
-    
-    for (const file of configFiles) {
-      const tsPath = path.join(targetDir, file);
-      if (await fs.pathExists(tsPath)) {
-        const jsPath = tsPath.replace('.ts', '.js');
-        const content = await fs.readFile(tsPath, 'utf-8');
-        
-        // 使用TypeScript编译器API转换代码
-        const jsContent = this.transpileTsToJs(content);
-        
-        await fs.writeFile(jsPath, jsContent);
-        await fs.remove(tsPath);
-      }
-    }
+    // 2. 转换配置文件扩展名 - 由子类实现
+    await this.convertConfigFiles(targetDir);
     
     // 3. 转换src目录下的ts文件
     await this.convertTsToJsInDir(path.join(targetDir, 'src'));
     
     // 4. 移除TypeScript配置文件
-    const tsConfigFiles = [
-      'tsconfig.json',
-      'tsconfig.app.json',
-      'tsconfig.node.json',
-      'tsconfig.vitest.json',
-      'env.d.ts'
-    ];
-    
-    for (const file of tsConfigFiles) {
-      const filePath = path.join(targetDir, file);
-      if (await fs.pathExists(filePath)) {
-        await fs.remove(filePath);
-      }
-    }
+    await this.removeTypeScriptConfigFiles(targetDir);
     
     // 5. 移除components.d.ts和auto-import.d.ts
     const dtsFiles = [
@@ -252,4 +220,35 @@ export abstract class BaseTemplateHandler implements TemplateHandler {
     // 返回转换后的JavaScript代码
     return result.outputText;
   }
-} 
+
+  /**
+   * 转换配置文件扩展名
+   * 子类应该重写此方法以处理特定模板的配置文件
+   * @param targetDir 目标目录
+   */
+  protected async convertConfigFiles(targetDir: string): Promise<void> {
+    // 基类提供空实现，由子类重写
+  }
+
+  /**
+   * 移除TypeScript配置文件
+   * 子类可以重写此方法以处理特定模板的TypeScript配置文件
+   * @param targetDir 目标目录
+   */
+  protected async removeTypeScriptConfigFiles(targetDir: string): Promise<void> {
+    const tsConfigFiles = [
+      'tsconfig.json',
+      'tsconfig.app.json',
+      'tsconfig.node.json',
+      'tsconfig.vitest.json',
+      'env.d.ts'
+    ];
+
+    for (const file of tsConfigFiles) {
+      const filePath = path.join(targetDir, file);
+      if (await fs.pathExists(filePath)) {
+        await fs.remove(filePath);
+      }
+    }
+  }
+}
