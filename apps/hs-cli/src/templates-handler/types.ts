@@ -8,4 +8,4 @@ export interface TemplateFeature {
   message: string;
   /** 是否默认选中该特性 */
   checked: boolean;
-} 
+}

@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BaseTemplateHandler } from '../base-template-handler';
 import { TemplateFeature } from '../types';
+import { CodeModifier } from '../code-modifier';
 
 /**
  * Vue3模板处理器
@@ -23,37 +24,37 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
       },
       {
         name: 'jsx',
-        message: 'JSX 支持',
-        checked: true
+        message: 'JSX',
+        checked: false
       },
       {
         name: 'router',
-        message: 'Vue Router (单页面应用开发)',
-        checked: true
+        message: 'Vue Router',
+        checked: false
       },
       {
         name: 'pinia',
-        message: 'Pinia (状态管理)',
-        checked: true
+        message: 'Pinia',
+        checked: false
       },
       {
         name: 'unocss',
-        message: 'UnoCSS (原子化CSS)',
-        checked: true
+        message: 'UnoCSS',
+        checked: false
       },
       {
         name: 'vitest',
-        message: 'Vitest (单元测试)',
-        checked: true
+        message: 'Vitest',
+        checked: false
       },
       {
         name: 'auto-import',
-        message: 'Auto Import (自动导入)',
+        message: 'Auto Import',
         checked: true
       },
       {
         name: 'components',
-        message: 'Components (组件自动注册)',
+        message: 'Components',
         checked: true
       }
     ];
@@ -70,24 +71,21 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
       return;
     }
 
-    const pkg = await fs.readJson(pkgPath);
-
     // 如果不需要TypeScript，处理相关文件
     if (!features.typescript) {
       await this.handleTypescriptFiles(targetDir);
     }
-    
+
     // 如果不需要JSX支持，移除相关依赖
     if (!features.jsx) {
-      delete pkg.devDependencies['@vitejs/plugin-vue-jsx'];
-      // 同时修改vite.config.ts
+      await CodeModifier.removeDependencies(pkgPath, ['@vitejs/plugin-vue-jsx'], 'devDependencies');
       await this.removeJsxFromViteConfig(targetDir);
     }
-    
+
     // 如果不需要Pinia，移除相关依赖
     if (!features.pinia) {
-      delete pkg.dependencies['pinia'];
-      // 同时移除stores目录
+      await CodeModifier.removeDependencies(pkgPath, ['pinia'], 'dependencies');
+      // 移除stores目录
       const storesDir = path.join(targetDir, 'src/stores');
       if (await fs.pathExists(storesDir)) {
         await fs.remove(storesDir);
@@ -95,11 +93,11 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
       // 修改main.ts，移除pinia相关代码
       await this.removePiniaFromMainTs(targetDir);
     }
-    
+
     // 如果不需要Vue Router，移除相关依赖
     if (!features.router) {
-      delete pkg.dependencies['vue-router'];
-      // 同时移除router目录和views目录
+      await CodeModifier.removeDependencies(pkgPath, ['vue-router'], 'dependencies');
+      // 移除router目录和views目录
       const routerDir = path.join(targetDir, 'src/router');
       const viewsDir = path.join(targetDir, 'src/views');
       if (await fs.pathExists(routerDir)) {
@@ -111,11 +109,11 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
       // 修改main.ts，移除router相关代码
       await this.removeRouterFromMainTs(targetDir);
     }
-    
+
     // 如果不需要UnoCSS，移除相关依赖
     if (!features.unocss) {
-      delete pkg.devDependencies['unocss'];
-      // 同时移除uno.config.ts
+      await CodeModifier.removeDependencies(pkgPath, ['unocss'], 'devDependencies');
+      // 移除uno.config.ts
       const unoConfigPath = path.join(targetDir, 'uno.config.ts');
       if (await fs.pathExists(unoConfigPath)) {
         await fs.remove(unoConfigPath);
@@ -125,14 +123,16 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
       // 修改main.ts，移除UnoCSS相关导入
       await this.removeUnoFromMainTs(targetDir);
     }
-    
+
     // 如果不需要Vitest，移除相关依赖
     if (!features.vitest) {
-      delete pkg.devDependencies['vitest'];
-      delete pkg.devDependencies['@vue/test-utils'];
-      delete pkg.devDependencies['jsdom'];
-      delete pkg.scripts['test:unit'];
-      // 同时移除vitest.config.ts
+      await CodeModifier.removeDependencies(
+        pkgPath,
+        ['vitest', '@vue/test-utils', 'jsdom'],
+        'devDependencies'
+      );
+      await CodeModifier.removeScripts(pkgPath, ['test:unit']);
+      // 移除vitest.config.ts
       const vitestConfigPath = path.join(targetDir, 'vitest.config.ts');
       if (await fs.pathExists(vitestConfigPath)) {
         await fs.remove(vitestConfigPath);
@@ -143,10 +143,10 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
         await fs.remove(tsVitestPath);
       }
     }
-    
+
     // 如果不需要Auto Import，移除相关依赖
     if (!features['auto-import']) {
-      delete pkg.devDependencies['unplugin-auto-import'];
+      await CodeModifier.removeDependencies(pkgPath, ['unplugin-auto-import'], 'devDependencies');
       // 修改vite.config.ts，移除Auto Import相关代码
       await this.removeAutoImportFromViteConfig(targetDir);
       // 移除auto-import.d.ts
@@ -155,10 +155,10 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
         await fs.remove(autoImportDtsPath);
       }
     }
-    
+
     // 如果不需要Components，移除相关依赖
     if (!features.components) {
-      delete pkg.devDependencies['unplugin-vue-components'];
+      await CodeModifier.removeDependencies(pkgPath, ['unplugin-vue-components'], 'devDependencies');
       // 修改vite.config.ts，移除Components相关代码
       await this.removeComponentsFromViteConfig(targetDir);
       // 移除components.d.ts
@@ -167,9 +167,6 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
         await fs.remove(componentsDtsPath);
       }
     }
-
-    // 保存修改后的package.json
-    await fs.writeJson(pkgPath, pkg, { spaces: 2 });
   }
 
   /**
@@ -178,19 +175,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeJsxFromViteConfig(targetDir: string): Promise<void> {
     const viteConfigPath = path.join(targetDir, 'vite.config.ts');
-    if (!await fs.pathExists(viteConfigPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(viteConfigPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import vueJsx from ['"]@vitejs\/plugin-vue-jsx['"][\r\n]/g, '');
-    
-    // 移除插件配置
-    content = content.replace(/vueJsx\(\),[\r\n]/g, '');
-    
-    await fs.writeFile(viteConfigPath, content);
+    await CodeModifier.removeImport(viteConfigPath, '@vitejs/plugin-vue-jsx');
+    await CodeModifier.removeVitePlugin(viteConfigPath, 'vueJsx');
   }
 
   /**
@@ -199,19 +185,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removePiniaFromMainTs(targetDir: string): Promise<void> {
     const mainTsPath = path.join(targetDir, 'src/main.ts');
-    if (!await fs.pathExists(mainTsPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(mainTsPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import { createPinia } from ['"]pinia['"][\r\n]/g, '');
-    
-    // 移除pinia使用
-    content = content.replace(/app\.use\(createPinia\(\)\)[\r\n]/g, '');
-    
-    await fs.writeFile(mainTsPath, content);
+    await CodeModifier.removeImport(mainTsPath, 'pinia');
+    await CodeModifier.removeFunctionCall(mainTsPath, 'app.use', 'createPinia');
   }
 
   /**
@@ -220,19 +195,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeRouterFromMainTs(targetDir: string): Promise<void> {
     const mainTsPath = path.join(targetDir, 'src/main.ts');
-    if (!await fs.pathExists(mainTsPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(mainTsPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import router from ['"]\.\/router['"][\r\n]/g, '');
-    
-    // 移除router使用
-    content = content.replace(/app\.use\(router\)[\r\n]/g, '');
-    
-    await fs.writeFile(mainTsPath, content);
+    await CodeModifier.removeImportsByNames(mainTsPath, ['router']);
+    await CodeModifier.removeFunctionCall(mainTsPath, 'app.use', 'router');
   }
 
   /**
@@ -241,19 +205,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeUnoFromViteConfig(targetDir: string): Promise<void> {
     const viteConfigPath = path.join(targetDir, 'vite.config.ts');
-    if (!await fs.pathExists(viteConfigPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(viteConfigPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import UnoCSS from ['"]unocss\/vite['"][\r\n]/g, '');
-    
-    // 移除插件配置
-    content = content.replace(/UnoCSS\(\),[\r\n]/g, '');
-    
-    await fs.writeFile(viteConfigPath, content);
+    await CodeModifier.removeImport(viteConfigPath, 'unocss/vite');
+    await CodeModifier.removeVitePlugin(viteConfigPath, 'UnoCSS');
   }
 
   /**
@@ -262,17 +215,7 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeUnoFromMainTs(targetDir: string): Promise<void> {
     const mainTsPath = path.join(targetDir, 'src/main.ts');
-    if (!await fs.pathExists(mainTsPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(mainTsPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import ['"]uno\.css['"][\r\n]/g, '');
-    content = content.replace(/import ['"]@unocss\/reset\/tailwind\.css['"][\r\n]/g, '');
-    
-    await fs.writeFile(mainTsPath, content);
+    await CodeModifier.removeImportsByNames(mainTsPath, ['uno.css', '@unocss/reset/tailwind.css']);
   }
 
   /**
@@ -281,19 +224,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeAutoImportFromViteConfig(targetDir: string): Promise<void> {
     const viteConfigPath = path.join(targetDir, 'vite.config.ts');
-    if (!await fs.pathExists(viteConfigPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(viteConfigPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import AutoImport from ['"]unplugin-auto-import\/vite['"][\r\n]/g, '');
-    
-    // 移除插件配置
-    content = content.replace(/AutoImport\(\{[\s\S]*?\}\),[\r\n]/g, '');
-    
-    await fs.writeFile(viteConfigPath, content);
+    await CodeModifier.removeImport(viteConfigPath, 'unplugin-auto-import/vite');
+    await CodeModifier.removeVitePlugin(viteConfigPath, 'AutoImport');
   }
 
   /**
@@ -302,19 +234,8 @@ export class Vue3TemplateHandler extends BaseTemplateHandler {
    */
   private async removeComponentsFromViteConfig(targetDir: string): Promise<void> {
     const viteConfigPath = path.join(targetDir, 'vite.config.ts');
-    if (!await fs.pathExists(viteConfigPath)) {
-      return;
-    }
-
-    let content = await fs.readFile(viteConfigPath, 'utf-8');
-    
-    // 移除import
-    content = content.replace(/import Components from ['"]unplugin-vue-components\/vite['"][\r\n]/g, '');
-    
-    // 移除插件配置
-    content = content.replace(/Components\(\{[\s\S]*?\}\),[\r\n]/g, '');
-    
-    await fs.writeFile(viteConfigPath, content);
+    await CodeModifier.removeImport(viteConfigPath, 'unplugin-vue-components/vite');
+    await CodeModifier.removeVitePlugin(viteConfigPath, 'Components');
   }
 
   /**

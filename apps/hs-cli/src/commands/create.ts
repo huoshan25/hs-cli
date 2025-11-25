@@ -62,12 +62,17 @@ export function createCommand(program: Command): void {
         // 2. 选择模板特性
         console.log(chalk.yellow('✨ 第 2 步：选择项目特性'));
         const features = templateHandler.getFeatures();
+
         const { selectedFeatures } = await inquirer.prompt([
           {
             type: 'checkbox',
             name: 'selectedFeatures',
-            message: '请选择项目特性（使用空格键选择/取消选择，回车键确认）:',
-            choices: features,
+            message: '选择项目特性:',
+            choices: features.map(feature => ({
+              name: feature.message,
+              value: feature.name,
+              checked: feature.checked
+            })),
             pageSize: 10,
             prefix: chalk.green('?'),
             validate: (answer) => {
@@ -84,7 +89,7 @@ export function createCommand(program: Command): void {
           acc[feature.name] = selectedFeatures.includes(feature.name);
           return acc;
         }, {} as Record<string, boolean>);
-        
+
         console.log(chalk.green(`✓ 已选择特性: ${selectedFeatures.join(', ')}\n`));
         
         // 3. 输入项目名称

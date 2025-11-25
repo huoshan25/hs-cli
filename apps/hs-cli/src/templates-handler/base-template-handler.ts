@@ -38,20 +38,33 @@ export abstract class BaseTemplateHandler implements TemplateHandler {
    */
   async processTemplate(targetDir: string, features: Record<string, boolean>, projectName: string): Promise<void> {
     const templateDir = path.join(this.templatesDir, this.templateName);
-    
+
     // 确保模板目录存在
     if (!fs.existsSync(templateDir)) {
       throw new Error(`模板 ${this.templateName} 不存在`);
     }
+
+    // 验证特性依赖关系
+    const validatedFeatures = this.validateFeatureDependencies(features);
 
     // 复制整个模板目录到目标目录
     await fs.copy(templateDir, targetDir);
 
     // 处理项目名称
     await this.processProjectName(targetDir, projectName);
-    
+
     // 处理特性
-    await this.processFeatures(targetDir, features);
+    await this.processFeatures(targetDir, validatedFeatures);
+  }
+
+  /**
+   * 验证特性依赖关系
+   * @param features 用户选择的特性
+   * @returns 验证后的特性配置
+   */
+  protected validateFeatureDependencies(features: Record<string, boolean>): Record<string, boolean> {
+    // TODO: 直接返回用户选择的特性
+    return { ...features };
   }
 
   /**

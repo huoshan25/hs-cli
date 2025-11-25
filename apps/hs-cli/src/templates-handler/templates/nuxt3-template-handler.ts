@@ -23,32 +23,32 @@ export class Nuxt3TemplateHandler extends BaseTemplateHandler {
       },
       {
         name: 'unocss',
-        message: 'UnoCSS (原子化CSS)',
+        message: 'UnoCSS',
         checked: true
       },
       {
         name: 'sass',
-        message: 'Sass (CSS预处理器)',
+        message: 'Sass',
         checked: true
       },
       {
         name: 'vueuse',
-        message: 'VueUse (实用工具集)',
+        message: 'VueUse',
         checked: true
       },
       {
         name: 'nuxt-image',
-        message: 'Nuxt Image (图像优化)',
+        message: 'Nuxt Image',
         checked: true
       },
       {
         name: 'auto-import',
-        message: 'Auto Import (自动导入)',
+        message: 'Auto Import',
         checked: true
       },
       {
         name: 'components',
-        message: 'Components (组件自动注册)',
+        message: 'Components',
         checked: true
       }
     ];
