@@ -11,7 +11,7 @@
     "build": "tsc -b",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
-    "test": "echo \"No tests yet\"",
+    "test": "pnpm -r test",
     "lint": "eslint src --ext .ts",
     "cli:create": "node bin/hs-cli.js create",
     "cli:generate": "node bin/hs-cli.js generate",
