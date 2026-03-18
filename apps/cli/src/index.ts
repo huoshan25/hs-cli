@@ -25,8 +25,8 @@ const version = packageJson.version || '0.0.0';
  * 设置CLI基本信息
  */
 program
-  .name('create-hs-cli')
-  .description('一个用于快速生成项目脚手架的CLI工具')
+  .name('hs-cli')
+  .description('前端开发 CLI 工具，支持项目创建、代码生成和配置初始化')
   .version(version, '-v, --version', '显示当前版本');
 
 /**
@@ -41,8 +41,9 @@ initCommand(program);
  */
 program.addHelpText('after', `
 示例:
-  $ npx create-hs-cli
-  $ npx create-hs-cli --force
+  $ npx hs-cli create
+  $ npx hs-cli generate component Button
+  $ npx hs-cli init
 `);
 
 /**
