@@ -26,7 +26,7 @@ const version = packageJson.version || '0.0.0';
  */
 program
   .name('hs-cli')
-  .description('前端开发 CLI 工具，支持项目创建、代码生成和配置初始化')
+  .description('一个持续进化的 CLI 工具集')
   .version(version, '-v, --version', '显示当前版本');
 
 /**
