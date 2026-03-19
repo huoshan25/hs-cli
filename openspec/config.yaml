@@ -1,18 +1,18 @@
 schema: spec-driven
 
 context: |
-  项目：hs-cli，一个前端项目脚手架 CLI 工具
+  项目：hs-cli，一个前端开发 CLI 工具
   结构：pnpm workspaces monorepo
-  主包：create-hs-cli（apps/hs-cli），bin 命令为 create-hs-cli
+  主包：@huo-shan/cli（apps/cli），bin 命令为 hs-cli
   工具包：@huo-shan/utils（packages/utils），发布到 npm
   技术栈：TypeScript、Commander.js、Inquirer.js、Chalk
-  构建：tsc（TypeScript 编译器），ES2020 target，CommonJS 模块
+  构建：tsc（TypeScript 编译器），ES2018 target，CommonJS 模块
   包管理：pnpm 7+，Node.js 16+
   代码规范：ESLint（TypeScript），strict 模式，无 Prettier 配置
-  版本管理：standard-version 语义化版本
-  测试：暂无测试框架
+  版本管理：手动管理，CHANGELOG 由 AI 基于 openspec 生成
+  测试：Vitest
   支持模板：Vue3、Nuxt3，可选特性包括 TypeScript、Router、Pinia、UnoCSS、Vitest 等
-  提交规范：conventional commits（standard-version 依赖此规范）
+  提交规范：conventional commits
 
 rules:
   proposal:
@@ -30,3 +30,4 @@ rules:
     - 若变更涉及 packages/*，建议补充 logs/packages-change-log.md（非强制）。
     - 变更日志推荐字段：日期、包名、变更类型、摘要、影响范围、验证结果、备注。
     - 变更类型建议使用：feat | fix | refactor | chore | docs。
+    - 代码注释使用文档注释（/** */），尽量避免使用行内注释（//）。

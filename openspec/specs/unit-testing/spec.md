@@ -1,14 +1,14 @@
 ## ADDED Requirements
 
 ### Requirement: 测试框架配置
-项目 SHALL 在 `apps/hs-cli` 和 `packages/utils` 中配置 Vitest，使 `pnpm test` 可正常运行。
+项目 SHALL 在 `apps/cli` 和 `packages/utils` 中配置 Vitest，使 `pnpm test` 可正常运行。
 
 #### Scenario: 根目录运行测试
 - **WHEN** 在项目根目录执行 `pnpm test`
 - **THEN** 所有包的测试用例被执行，并输出通过/失败结果
 
 #### Scenario: 单包运行测试
-- **WHEN** 在 `apps/hs-cli` 目录执行 `pnpm test`
+- **WHEN** 在 `apps/cli` 目录执行 `pnpm test`
 - **THEN** 仅运行该包的测试用例
 
 ### Requirement: CLI 命令解析测试

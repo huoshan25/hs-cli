@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Vue3TemplateHandler } from '../../templates-handler/templates/vue3-template-handler'
+import { Vue3TemplateHandler } from '../../commands/create/templates-handler/templates/vue3-template-handler'
 
 describe('Vue3TemplateHandler - getFeatures', () => {
   const handler = new Vue3TemplateHandler('/fake/templates')

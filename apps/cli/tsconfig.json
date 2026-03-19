@@ -13,5 +13,5 @@
     "noEmitOnError": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/templates"]
+  "exclude": ["node_modules", "dist", "src/commands/create/templates"]
 }

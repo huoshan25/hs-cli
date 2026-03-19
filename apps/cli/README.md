@@ -1,4 +1,4 @@
-# hs-cli
+# @huo-shan/cli
 
 现代化的前端开发 CLI 工具，支持快速创建项目、生成代码文件及初始化配置。
 
@@ -15,10 +15,10 @@
 
 ```bash
 # 全局安装
-npm install -g hs-cli
+npm install -g @huo-shan/cli
 
 # 或者直接使用 npx
-npx hs-cli
+npx @huo-shan/cli
 ```
 
 ## 使用方法

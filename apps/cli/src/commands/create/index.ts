@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import cliProgress from 'cli-progress';
 import { formatLog, validateName } from '@huo-shan/utils';
-import { TemplateFactory } from '../templates-handler';
+import { TemplateFactory } from './templates-handler';
 
 export function createCommand(program: Command): void {
   program
@@ -26,7 +26,7 @@ export function createCommand(program: Command): void {
         });
         
         // 创建模板工厂，指定模板文件目录
-        const templateFactory = new TemplateFactory(path.resolve(__dirname, '../templates'));
+        const templateFactory = new TemplateFactory(path.resolve(__dirname, './templates'));
         
         // 1. 先选择模板
         const availableTemplates = templateFactory.getAvailableTemplates();

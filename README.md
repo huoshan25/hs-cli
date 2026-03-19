@@ -23,15 +23,16 @@
 │       ├── dist               # 构建输出目录
 │       └── src                # 源代码
 │           ├── commands       # 命令实现
-│           ├── templates      # 项目模板
-│           └── templates-handler  # 模板处理器
+│           │   ├── create/    # create 命令（含模板和处理器）
+│           │   ├── generate.ts
+│           │   └── init.ts
 └── packages                   # 共享包
     └── utils                  # 共享工具函数包
 ```
 
 ## 包说明
 
-### hs-cli
+### @huo-shan/cli
 
 主要的 CLI 工具，支持项目创建、代码生成和配置初始化。
 

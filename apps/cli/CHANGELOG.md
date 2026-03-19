@@ -4,10 +4,12 @@
 
 ### 重构
 
-- 包名从 `create-hs-cli` 改为 `hs-cli`，bin 命令同步更新
+- 包名从 `create-hs-cli` 改为 `@huo-shan/cli`，bin 命令保持 `hs-cli` 不变
 - 目录从 `apps/hs-cli/` 重命名为 `apps/cli/`
 - 移除 `standard-version`，改为手动管理版本和 CHANGELOG
 - CLI 描述更新，去掉"脚手架"定位，改为通用前端开发 CLI 工具
+- `create` 命令相关资源（`templates/`、`templates-handler/`）从 `src/` 顶层移入 `src/commands/create/` 下，命令代码聚合管理
+- `create.ts` 改为 `create/index.ts`，外部导入路径不变
 
 ### 功能
 
