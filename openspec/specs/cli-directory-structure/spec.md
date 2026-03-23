@@ -1,3 +1,9 @@
+## Purpose
+
+定义 CLI monorepo 在目录命名、命令资源归属、导入路径稳定性与发布脚本一致性方面的结构规范，确保重构后仍能保持可维护、可扩展且对外行为稳定的工程基线。
+
+## Requirements
+
 ### Requirement: CLI 应用目录命名规范
 monorepo 中 `apps/` 下的目录名 SHALL 描述其角色而非重复项目名，CLI 入口目录 SHALL 命名为 `cli`。
 

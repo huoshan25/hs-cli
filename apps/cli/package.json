@@ -1,6 +1,6 @@
 {
   "name": "@huo-shan/cli",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "一个持续进化的 CLI 工具集",
   "main": "dist/index.js",
@@ -14,9 +14,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "clean": "node -e \"require('fs-extra').removeSync('dist')\"",
+    "build": "npm run clean && tsc",
+    "build:openspec-web": "pnpm --filter @huo-shan/openspec-web build",
+    "copy-openspec-web": "node -e \"require('fs-extra').copySync('../openspec-web/build/client', 'dist/openspec-web')\"",
     "copy-templates": "node -e \"require('fs-extra').copySync('src/commands/create/templates', 'dist/commands/create/templates')\"",
-    "prepublishOnly": "npm run build && npm run copy-templates",
+    "prepare-release-assets": "npm run build && npm run copy-templates && npm run build:openspec-web && npm run copy-openspec-web",
+    "prepack": "npm run prepare-release-assets",
+    "prepublishOnly": "npm run prepare-release-assets",
     "start": "node bin/hs-cli.js",
     "dev": "ts-node src/index.ts",
     "test": "vitest run",
@@ -26,7 +31,7 @@
     "cli:init": "node bin/hs-cli.js init"
   },
   "dependencies": {
-    "@huo-shan/utils": "workspace:*",
+    "blessed": "^0.1.81",
     "chalk": "^4.1.2",
     "cli-progress": "3.12.0",
     "commander": "^10.0.0",

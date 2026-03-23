@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import ora from 'ora';
 import cliProgress from 'cli-progress';
-import { formatLog, validateName } from '@huo-shan/utils';
+import { formatLog, validateName } from '../../util/common';
 import { TemplateFactory } from './templates-handler';
 
 export function createCommand(program: Command): void {

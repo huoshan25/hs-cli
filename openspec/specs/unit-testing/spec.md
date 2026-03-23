@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+定义项目测试体系在命令解析、模板特征校验、工具函数边界处理等方面的最低能力与覆盖要求，确保 CLI 与共享包演进过程中具备稳定、可回归、可定位问题的测试保障。
+
+## Requirements
 
 ### Requirement: 测试框架配置
 项目 SHALL 在 `apps/cli` 和 `packages/utils` 中配置 Vitest，使 `pnpm test` 可正常运行。

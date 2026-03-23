@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateName } from '@huo-shan/utils'
+import { validateName } from '../../util/common'
 
 // create 命令中的验证逻辑
 function validateProjectName(input: string): true | string {

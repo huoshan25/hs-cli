@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { createCommand } from './commands/create';
 import { generateCommand } from './commands/generate';
 import { initCommand } from './commands/init';
+import { openspecCommand } from './commands/openspec';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -35,6 +36,7 @@ program
 createCommand(program);
 generateCommand(program);
 initCommand(program);
+openspecCommand(program);
 
 /**
  * 添加帮助信息
@@ -44,6 +46,7 @@ program.addHelpText('after', `
   $ npx hs-cli create
   $ npx hs-cli generate component Button
   $ npx hs-cli init
+  $ npx hs-cli openspec --ui web
 `);
 
 /**

@@ -51,6 +51,7 @@ coverage
 
 # Vite/Vue相关
 *.local
+apps/openspec-web/.react-router
 
 # Turborepo
 .turbo

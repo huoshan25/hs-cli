@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateName } from '@huo-shan/utils'
+import { validateName } from '../../util/common'
 
 // generate 命令中的验证逻辑（从命令中提取的纯逻辑）
 const VALID_TYPES = ['component', 'page', 'service', 'hook'] as const

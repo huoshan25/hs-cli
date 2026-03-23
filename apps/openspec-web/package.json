@@ -1,0 +1,37 @@
+{
+  "name": "@huo-shan/openspec-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@react-router/node": "7.13.1",
+    "@react-router/serve": "7.13.1",
+    "highlight.js": "^11.11.1",
+    "isbot": "^5.1.36",
+    "markdown-it": "^14.1.1",
+    "mermaid": "^11.13.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router": "7.13.1"
+  },
+  "devDependencies": {
+    "@react-router/dev": "7.13.1",
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^1.6.1"
+  }
+}

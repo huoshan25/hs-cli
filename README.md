@@ -12,6 +12,7 @@
 - 🛠️ 现代化 CLI 工具，支持创建 Vue3 和 Nuxt3 项目
 - 📦 共享工具包，提高代码复用性
 - 🔧 统一的开发、构建和发布流程
+- 🖥️ 支持 OpenSpec 命令行/TUI/Web 可视化面板
 
 ## 仓库结构
 
@@ -25,7 +26,9 @@
 │           ├── commands       # 命令实现
 │           │   ├── create/    # create 命令（含模板和处理器）
 │           │   ├── generate.ts
-│           │   └── init.ts
+│           │   ├── init.ts
+│           │   └── openspec.ts
+│   └── openspec-web           # OpenSpec Web 面板
 └── packages                   # 共享包
     └── utils                  # 共享工具函数包
 ```
@@ -34,7 +37,7 @@
 
 ### @huo-shan/cli
 
-主要的 CLI 工具，支持项目创建、代码生成和配置初始化。
+主要的 CLI 工具，支持项目创建、代码生成、配置初始化和 OpenSpec 可视化面板（`hs-cli openspec`）。
 
 > **注意**: 关于 CLI 工具的详细使用方法，请查看 [CLI 工具的 README 文档](./apps/cli/README.md)
 
