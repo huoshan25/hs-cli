@@ -1,0 +1,8 @@
+name: release-changelog-builder
+version: 0.1.0
+owner: release
+status: active
+tags:
+  - release
+  - docs
+description: 当用户准备发版并请求整理变更说明时，用于汇总 commit 与功能点，生成结构化 changelog 与发布备注。

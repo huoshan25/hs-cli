@@ -1,0 +1,8 @@
+name: spec-proposal-writer
+version: 0.1.0
+owner: platform
+status: active
+tags:
+  - openspec
+  - planning
+description: 当用户请求生成 OpenSpec proposal/design/tasks 时，用于分析需求边界并生成可执行的变更草案。

@@ -1,6 +1,6 @@
 # hs-cli
 
-现代化的前端开发 CLI 工具集，采用 monorepo 架构管理，支持快速创建项目、生成代码文件及初始化配置。
+现代化的前端开发 CLI 工具集，采用 monorepo 架构管理，支持快速创建项目、生成代码文件、初始化配置及 AI skills 管理。
 
 ## 项目概述
 
@@ -13,6 +13,8 @@
 - 📦 共享工具包，提高代码复用性
 - 🔧 统一的开发、构建和发布流程
 - 🖥️ 支持 OpenSpec 命令行/TUI/Web 可视化面板
+- 🤖 提供仓库级 `skills/` 作者侧目录与 `hs-cli skills` 管理命令
+- 🔗 支持将 skill 安装到用户目录，并链接到 AI 客户端消费目录
 
 ## 仓库结构
 
@@ -28,7 +30,10 @@
 │           │   ├── generate.ts
 │           │   ├── init.ts
 │           │   └── openspec.ts
-│   └── openspec-web           # OpenSpec Web 面板
+│   └── hs-console             # Console Web 面板
+├── skills                     # AI skills 资产目录
+│   ├── registry               # skills 注册表
+│   └── templates              # skills 模板目录
 └── packages                   # 共享包
     └── utils                  # 共享工具函数包
 ```
@@ -37,7 +42,44 @@
 
 ### @huo-shan/cli
 
-主要的 CLI 工具，支持项目创建、代码生成、配置初始化和 OpenSpec 可视化面板（`hs-cli openspec`）。
+主要的 CLI 工具，支持项目创建、代码生成、配置初始化、Console 可视化面板（`hs-cli console`）以及 skills 管理（`hs-cli skills`）。
+
+当前 skills 的使用模型是：
+
+- 项目中的 `skills/` 目录只负责存放作者侧源文件
+- CLI 发布包可携带官方内置 skills，用户安装后可直接查看和安装
+- 用户通过 `hs-cli skills add` 或 `hs-cli skills install` 把 skill 安装到全局用户目录
+- 用户再通过 `hs-cli skills link --agent codex` 把已安装 skill 链接到 Codex 的消费目录
+
+最短使用路径：
+
+```bash
+# 用户侧：查看 CLI 自带的官方 skills
+hs-cli skills list --scope official
+
+# 安装官方 skill，默认会链接到 Codex
+hs-cli skills add code-review-guardian
+
+# 安装本地第三方 skill
+hs-cli skills add ./path/to/other-skill
+
+# 安装第三方 git skill
+hs-cli skills add git+https://example.com/your-skill.git
+
+# 查看已安装状态
+hs-cli skills list --scope installed
+hs-cli skills doctor
+```
+
+默认路径：
+
+- 安装目录：`~/.hs-cli/skills/installed`
+- Codex 目录：`~/.codex/skills`
+
+Windows 下等价目录位于 `%USERPROFILE%` 下，对应：
+
+- `%USERPROFILE%\\.hs-cli\\skills\\installed`
+- `%USERPROFILE%\\.codex\\skills`
 
 > **注意**: 关于 CLI 工具的详细使用方法，请查看 [CLI 工具的 README 文档](./apps/cli/README.md)
 

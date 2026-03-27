@@ -86,7 +86,7 @@ importers:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@18.19.111)(lightningcss@1.32.0)
 
-  apps/openspec-web:
+  apps/hs-console:
     dependencies:
       '@react-router/node':
         specifier: 7.13.1

@@ -1,0 +1,8 @@
+name: code-review-guardian
+version: 0.1.0
+owner: engineering
+status: active
+tags:
+  - review
+  - quality
+description: 当用户要求做代码 review 时，用于分析变更风险、行为回归和缺失测试，并输出按严重级别排序的问题清单。

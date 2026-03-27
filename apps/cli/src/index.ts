@@ -5,7 +5,8 @@ import chalk from 'chalk';
 import { createCommand } from './commands/create';
 import { generateCommand } from './commands/generate';
 import { initCommand } from './commands/init';
-import { openspecCommand } from './commands/openspec';
+import { consoleCommand } from './commands/openspec';
+import { skillsCommand } from './commands/skills';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -36,7 +37,8 @@ program
 createCommand(program);
 generateCommand(program);
 initCommand(program);
-openspecCommand(program);
+consoleCommand(program);
+skillsCommand(program);
 
 /**
  * 添加帮助信息
@@ -46,7 +48,12 @@ program.addHelpText('after', `
   $ npx hs-cli create
   $ npx hs-cli generate component Button
   $ npx hs-cli init
-  $ npx hs-cli openspec --ui web
+  $ npx hs-cli console --ui web
+  $ npx hs-cli console openspec --ui web
+  $ npx hs-cli skills new my-skill
+  $ npx hs-cli skills list --scope official
+  $ npx hs-cli skills add my-skill
+  $ npx hs-cli skills list --scope installed
 `);
 
 /**

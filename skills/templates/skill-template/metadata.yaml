@@ -1,0 +1,7 @@
+name: __SKILL_NAME__
+version: 0.1.0
+owner: team
+status: draft
+tags:
+  - general
+description: 简要描述这个 skill 的用途

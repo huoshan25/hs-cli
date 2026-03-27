@@ -5,30 +5,49 @@ import { renderWebDashboard } from './web';
 import { loadRecentProjects, recordOpenedProjects, removeRecentProject } from './recent-projects';
 import { createActiveSession, listActiveProjects } from './active-sessions';
 import { executeOpenSpecPanelAction } from './panel-actions';
+import { loadSkills } from './skills';
 
-export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui', watch = true }) {
+export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui', watch = true, module = 'openspec', skillsDir }) {
   let projects = loadProjects({ cwd, docPath });
-  if (!projects.length) {
+  if (module === 'openspec' && !projects.length) {
     throw new Error('没有可展示的 OpenSpec 项目');
   }
-  recordOpenedProjects(projects, { ui, theme });
+  if (projects.length) {
+    recordOpenedProjects(projects, { ui, theme });
+  }
   const activeSession = createActiveSession(projects);
+  let skillsPayload = await loadSkills({ cwd, skillsDir });
 
   try {
     if (ui === 'web') {
       await renderWebDashboard({
         projects,
+        skills: skillsPayload.items,
+        skillsRoot: skillsPayload.root,
+        officialSkills: skillsPayload.officialItems,
+        officialSkillsRoot: skillsPayload.officialRoot,
+        installedSkills: skillsPayload.installedItems,
+        installedSkillsRoot: skillsPayload.installedDir,
+        initialPath: module === 'skills' ? '/skills' : '/',
         recentProjects: loadRecentProjects(),
         activeProjects: listActiveProjects(),
         themeName: theme,
         watch,
-        reload: () => {
+        reload: async () => {
           const scanned = loadProjects({ cwd, docPath });
           const next = mergeProjects(scanned, projects, { cwd });
+          const nextSkillsPayload = await loadSkills({ cwd, skillsDir });
           projects = next;
+          skillsPayload = nextSkillsPayload;
           activeSession.heartbeat(next);
           return {
             projects: next,
+            skills: nextSkillsPayload.items,
+            skillsRoot: nextSkillsPayload.root,
+            officialSkills: nextSkillsPayload.officialItems,
+            officialSkillsRoot: nextSkillsPayload.officialRoot,
+            installedSkills: nextSkillsPayload.installedItems,
+            installedSkillsRoot: nextSkillsPayload.installedDir,
             recentProjects: loadRecentProjects(),
             activeProjects: listActiveProjects()
           };
@@ -48,7 +67,7 @@ export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui
           };
         },
         removeRecentProject: (projectPath) => removeRecentProject(projectPath),
-        runOpenSpecAction: ({ projectPath, action, changeId, name }) => {
+        runOpenSpecAction: async ({ projectPath, action, changeId, name }) => {
           const targetPath = String(projectPath || '').trim();
           if (!targetPath) {
             throw new Error('缺少项目路径');
@@ -72,18 +91,29 @@ export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui
 
           const scanned = loadProjects({ cwd });
           projects = mergeProjects(scanned, projects, { cwd });
+          skillsPayload = await loadSkills({ cwd, skillsDir });
           recordOpenedProjects(projects, { ui: 'web', theme });
           activeSession.heartbeat(projects);
 
           return {
             ...commandResult,
             projects,
+            skills: skillsPayload.items,
+            skillsRoot: skillsPayload.root,
+            officialSkills: skillsPayload.officialItems,
+            officialSkillsRoot: skillsPayload.officialRoot,
+            installedSkills: skillsPayload.installedItems,
+            installedSkillsRoot: skillsPayload.installedDir,
             recentProjects: loadRecentProjects(),
             activeProjects: listActiveProjects()
           };
         }
       });
       return;
+    }
+
+    if (module === 'skills') {
+      throw new Error('skills 模块当前仅支持 Web 模式，请使用: hs-cli console skills --ui web');
     }
 
     await renderDashboard({ projects, themeName: theme });

@@ -9,9 +9,10 @@ import { useDashboardPolling } from './hooks/useDashboardPolling';
 import type { ActionResult, ArchiveItem, ChangeFilter, ChangeItem, DashboardData, DetailModel, SearchHit, SpecItem, SpecsFilter, TabMode, ThemeMode, VersionPayload } from './types';
 import { includesQuery, normalizeDashboardData } from './utils/dashboard';
 import { buildArchiveDetail, buildChangeDetail, buildOverviewDetail, buildSpecDetail } from './utils/renderers';
+import { reportBootError, reportBootReady, reportBootStage } from '../boot';
+import { applyTheme, resolveThemeFromStorage, THEME_EVENT } from '../theme';
 
 const EMPTY_DATA: DashboardData = { version: 0, projects: [], recentProjects: [], activeProjects: [] };
-const THEME_KEY = 'hs-cli-openspec-theme';
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...init });
@@ -36,7 +37,7 @@ export default function DashboardApp() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('就绪');
   const [version, setVersion] = useState(0);
-  const [theme, setTheme] = useState<ThemeMode>(() => (localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'));
+  const [theme, setTheme] = useState<ThemeMode>(() => resolveThemeFromStorage());
   const [specsFilter, setSpecsFilter] = useState<SpecsFilter>('all');
   const [changeFilter, setChangeFilter] = useState<ChangeFilter>('all');
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -56,6 +57,7 @@ export default function DashboardApp() {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const paletteInputRef = useRef<HTMLInputElement | null>(null);
   const projectHubInputRef = useRef<HTMLInputElement | null>(null);
+  const bootReadyRef = useRef(false);
 
   const project = data.projects[projectIndex];
   const specs = project?.specs || [];
@@ -310,7 +312,24 @@ export default function DashboardApp() {
   }
 
   useEffect(() => {
-    refreshDashboard().catch((error: unknown) => setMessage(error instanceof Error ? error.message : '加载失败'));
+    const init = async () => {
+      try {
+        reportBootError('');
+        reportBootStage('加载面板数据');
+        await refreshDashboard();
+        reportBootStage('渲染面板视图');
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : '加载失败';
+        setMessage(message);
+        reportBootError(`初始化失败: ${message}`);
+      } finally {
+        if (!bootReadyRef.current) {
+          bootReadyRef.current = true;
+          reportBootReady();
+        }
+      }
+    };
+    void init();
   }, [refreshDashboard]);
 
   useDashboardPolling({
@@ -324,9 +343,21 @@ export default function DashboardApp() {
   }, [tab, projectIndex, search, specsFilter, changeFilter]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
   }, [theme]);
+
+  useEffect(() => {
+    const onThemeChange = (event: Event) => {
+      const value = (event as CustomEvent<ThemeMode>).detail;
+      if (value === 'light' || value === 'dark') {
+        setTheme(value);
+        return;
+      }
+      setTheme(resolveThemeFromStorage());
+    };
+    window.addEventListener(THEME_EVENT, onThemeChange as EventListener);
+    return () => window.removeEventListener(THEME_EVENT, onThemeChange as EventListener);
+  }, []);
 
   useEffect(() => {
     if (paletteOpen) paletteInputRef.current?.focus();
@@ -362,12 +393,6 @@ export default function DashboardApp() {
 
   return (
     <div className="page">
-      <div className="global-actions">
-        <button className="link" onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}>
-          ◐
-        </button>
-      </div>
-
       <div className="tabs-wrap">
         {([
           ['overview', '概览'],

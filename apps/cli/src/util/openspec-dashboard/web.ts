@@ -18,6 +18,13 @@ const CONTENT_TYPES = {
 
 export async function renderWebDashboard({
   projects,
+  skills = [],
+  skillsRoot = '',
+  officialSkills = [],
+  officialSkillsRoot = '',
+  installedSkills = [],
+  installedSkillsRoot = '',
+  initialPath = '/',
   recentProjects = [],
   activeProjects = [],
   watch = true,
@@ -27,10 +34,26 @@ export async function renderWebDashboard({
   runOpenSpecAction
 }) {
   let currentProjects = projects;
+  let currentSkills = skills;
+  let currentSkillsRoot = skillsRoot;
+  let currentOfficialSkills = officialSkills;
+  let currentOfficialSkillsRoot = officialSkillsRoot;
+  let currentInstalledSkills = installedSkills;
+  let currentInstalledSkillsRoot = installedSkillsRoot;
   let currentRecentProjects = recentProjects;
   let currentActiveProjects = activeProjects;
   let version = 1;
-  let signature = projectSignature(currentProjects, currentRecentProjects, currentActiveProjects);
+  let signature = projectSignature(
+    currentProjects,
+    currentRecentProjects,
+    currentActiveProjects,
+    currentSkills,
+    currentSkillsRoot,
+    currentOfficialSkills,
+    currentOfficialSkillsRoot,
+    currentInstalledSkills,
+    currentInstalledSkillsRoot
+  );
   let reloading = false;
 
   const webDistDir = resolveWebDistDir();
@@ -49,6 +72,19 @@ export async function renderWebDashboard({
         projects: currentProjects,
         recentProjects: currentRecentProjects,
         activeProjects: currentActiveProjects
+      });
+      return;
+    }
+
+    if (pathname === '/api/skills') {
+      sendJson(res, 200, {
+        version,
+        items: currentSkills,
+        root: currentSkillsRoot,
+        officialItems: currentOfficialSkills,
+        officialRoot: currentOfficialSkillsRoot,
+        installedDir: currentInstalledSkillsRoot,
+        installedItems: currentInstalledSkills
       });
       return;
     }
@@ -75,7 +111,17 @@ export async function renderWebDashboard({
         }
         currentRecentProjects = Array.isArray(result?.recentProjects) ? result.recentProjects : currentRecentProjects;
         currentActiveProjects = Array.isArray(result?.activeProjects) ? result.activeProjects : currentActiveProjects;
-        signature = projectSignature(currentProjects, currentRecentProjects, currentActiveProjects);
+        signature = projectSignature(
+          currentProjects,
+          currentRecentProjects,
+          currentActiveProjects,
+          currentSkills,
+          currentSkillsRoot,
+          currentOfficialSkills,
+          currentOfficialSkillsRoot,
+          currentInstalledSkills,
+          currentInstalledSkillsRoot
+        );
         version += 1;
         sendJson(res, 200, {
           ok: true,
@@ -105,7 +151,15 @@ export async function renderWebDashboard({
       try {
         const nextRecent = removeRecentProject(projectPath);
         currentRecentProjects = Array.isArray(nextRecent) ? nextRecent : currentRecentProjects.filter(item => item.path !== projectPath);
-        signature = projectSignature(currentProjects, currentRecentProjects, currentActiveProjects);
+        signature = projectSignature(
+          currentProjects,
+          currentRecentProjects,
+          currentActiveProjects,
+          currentSkills,
+          currentSkillsRoot,
+          currentInstalledSkills,
+          currentInstalledSkillsRoot
+        );
         version += 1;
         sendJson(res, 200, { ok: true, version, recentProjects: currentRecentProjects });
       } catch (error) {
@@ -121,17 +175,35 @@ export async function renderWebDashboard({
       }
       const body = await readJsonBody(req);
       try {
-        const result = runOpenSpecAction({
+        const result = (await runOpenSpecAction({
           projectPath: String(body?.projectPath || '').trim(),
           action: String(body?.action || '').trim(),
           changeId: String(body?.changeId || '').trim(),
           name: String(body?.name || '').trim()
-        }) || {};
+        })) || {};
 
         currentProjects = Array.isArray(result.projects) ? result.projects : currentProjects;
+        currentSkills = Array.isArray(result.skills) ? result.skills : currentSkills;
+        currentSkillsRoot = typeof result.skillsRoot === 'string' ? result.skillsRoot : currentSkillsRoot;
+        currentOfficialSkills = Array.isArray(result.officialSkills) ? result.officialSkills : currentOfficialSkills;
+        currentOfficialSkillsRoot =
+          typeof result.officialSkillsRoot === 'string' ? result.officialSkillsRoot : currentOfficialSkillsRoot;
+        currentInstalledSkills = Array.isArray(result.installedSkills) ? result.installedSkills : currentInstalledSkills;
+        currentInstalledSkillsRoot =
+          typeof result.installedSkillsRoot === 'string' ? result.installedSkillsRoot : currentInstalledSkillsRoot;
         currentRecentProjects = Array.isArray(result.recentProjects) ? result.recentProjects : currentRecentProjects;
         currentActiveProjects = Array.isArray(result.activeProjects) ? result.activeProjects : currentActiveProjects;
-        signature = projectSignature(currentProjects, currentRecentProjects, currentActiveProjects);
+        signature = projectSignature(
+          currentProjects,
+          currentRecentProjects,
+          currentActiveProjects,
+          currentSkills,
+          currentSkillsRoot,
+          currentOfficialSkills,
+          currentOfficialSkillsRoot,
+          currentInstalledSkills,
+          currentInstalledSkillsRoot
+        );
         version += 1;
 
         sendJson(res, 200, {
@@ -165,13 +237,14 @@ export async function renderWebDashboard({
 
   const address = server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
-  const url = `http://127.0.0.1:${port}`;
+  const normalizedPath = String(initialPath || '/').startsWith('/') ? String(initialPath || '/') : `/${String(initialPath || '/')}`;
+  const url = `http://127.0.0.1:${port}${normalizedPath}`;
 
   const opened = tryOpenBrowser(url);
   if (!opened) {
-    console.log(`已启动 OpenSpec Web 面板，请手动打开: ${url}`);
+    console.log(`已启动 Console Web 面板，请手动打开: ${url}`);
   } else {
-    console.log(`OpenSpec Web 面板已启动: ${url}`);
+    console.log(`Console Web 面板已启动: ${url}`);
   }
 
   if (watch && typeof reload === 'function') {
@@ -180,13 +253,37 @@ export async function renderWebDashboard({
       if (reloading) return;
       reloading = true;
       try {
-        const payload = reload() || {};
+        const payload = (await reload()) || {};
         const nextProjects = Array.isArray(payload) ? payload : (payload.projects || []);
+        const nextSkills = Array.isArray(payload.skills) ? payload.skills : currentSkills;
+        const nextSkillsRoot = typeof payload.skillsRoot === 'string' ? payload.skillsRoot : currentSkillsRoot;
+        const nextOfficialSkills = Array.isArray(payload.officialSkills) ? payload.officialSkills : currentOfficialSkills;
+        const nextOfficialSkillsRoot =
+          typeof payload.officialSkillsRoot === 'string' ? payload.officialSkillsRoot : currentOfficialSkillsRoot;
+        const nextInstalledSkills = Array.isArray(payload.installedSkills) ? payload.installedSkills : currentInstalledSkills;
+        const nextInstalledSkillsRoot =
+          typeof payload.installedSkillsRoot === 'string' ? payload.installedSkillsRoot : currentInstalledSkillsRoot;
         const nextRecentProjects = Array.isArray(payload.recentProjects) ? payload.recentProjects : currentRecentProjects;
         const nextActiveProjects = Array.isArray(payload.activeProjects) ? payload.activeProjects : currentActiveProjects;
-        const nextSignature = projectSignature(nextProjects, nextRecentProjects, nextActiveProjects);
+        const nextSignature = projectSignature(
+          nextProjects,
+          nextRecentProjects,
+          nextActiveProjects,
+          nextSkills,
+          nextSkillsRoot,
+          nextOfficialSkills,
+          nextOfficialSkillsRoot,
+          nextInstalledSkills,
+          nextInstalledSkillsRoot
+        );
         if (nextSignature !== signature) {
           currentProjects = nextProjects;
+          currentSkills = nextSkills;
+          currentSkillsRoot = nextSkillsRoot;
+          currentOfficialSkills = nextOfficialSkills;
+          currentOfficialSkillsRoot = nextOfficialSkillsRoot;
+          currentInstalledSkills = nextInstalledSkills;
+          currentInstalledSkillsRoot = nextInstalledSkillsRoot;
           currentRecentProjects = nextRecentProjects;
           currentActiveProjects = nextActiveProjects;
           signature = nextSignature;
@@ -209,23 +306,23 @@ export async function renderWebDashboard({
 
 function resolveWebDistDir() {
   const hasIndexFile = (dir: string) => fs.existsSync(path.join(dir, 'index.html'));
-  const envDir = String(process.env.HS_CLI_OPENSPEC_WEB_DIST || '').trim();
+  const envDir = String(process.env.HS_CLI_CONSOLE_WEB_DIST || '').trim();
   if (envDir && fs.existsSync(envDir) && hasIndexFile(envDir)) {
     return envDir;
   }
-  const bundledDist = path.resolve(__dirname, '../../openspec-web');
+  const bundledDist = path.resolve(__dirname, '../../hs-console');
   if (fs.existsSync(bundledDist) && hasIndexFile(bundledDist)) {
     return bundledDist;
   }
-  const localBuildClient = path.resolve(__dirname, '../../../../openspec-web/build/client');
+  const localBuildClient = path.resolve(__dirname, '../../../../hs-console/build/client');
   if (fs.existsSync(localBuildClient) && hasIndexFile(localBuildClient)) {
     return localBuildClient;
   }
-  const localDist = path.resolve(__dirname, '../../../../openspec-web/dist');
+  const localDist = path.resolve(__dirname, '../../../../hs-console/dist');
   if (fs.existsSync(localDist) && hasIndexFile(localDist)) {
     return localDist;
   }
-  throw new Error('未找到 OpenSpec Web 资源，请先执行: pnpm --filter @huo-shan/openspec-web build');
+  throw new Error('未找到 Console Web 资源，请先执行: pnpm --filter @huo-shan/hs-console build');
 }
 
 function serveStatic(rootDir, pathname, res) {
@@ -268,7 +365,7 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
-function projectSignature(projects, recentProjects, activeProjects) {
+function projectSignature(projects, recentProjects, activeProjects, skills, skillsRoot, officialSkills, officialSkillsRoot, installedSkills, installedSkillsRoot) {
   const p = (Array.isArray(projects) ? projects : []).map(item => ({
     name: item?.name || '',
     root: item?.root || '',
@@ -284,7 +381,16 @@ function projectSignature(projects, recentProjects, activeProjects) {
   const a = (Array.isArray(activeProjects) ? activeProjects : [])
     .map(item => `${item.path}:${item.exists === false ? '0' : '1'}`)
     .sort();
-  return JSON.stringify({ p, r, a });
+  const s = (Array.isArray(skills) ? skills : [])
+    .map(item => `${item.id}:${item.version || ''}:${item.updatedAt || 0}:${item.status || ''}`)
+    .sort();
+  const o = (Array.isArray(officialSkills) ? officialSkills : [])
+    .map(item => `${item.id}:${item.version || ''}:${item.updatedAt || 0}:${item.status || ''}`)
+    .sort();
+  const i = (Array.isArray(installedSkills) ? installedSkills : [])
+    .map(item => `${item.id}:${item.version || ''}:${item.installedAt || 0}:${item.linkedAgents?.length || 0}`)
+    .sort();
+  return JSON.stringify({ p, r, a, s, sr: skillsRoot || '', o, or: officialSkillsRoot || '', i, ir: installedSkillsRoot || '' });
 }
 
 function readJsonBody(req) {
