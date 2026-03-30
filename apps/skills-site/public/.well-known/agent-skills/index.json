@@ -1,0 +1,49 @@
+{
+  "skills": [
+    {
+      "id": "code-review-guardian",
+      "name": "code-review-guardian",
+      "version": "0.1.0",
+      "owner": "engineering",
+      "status": "active",
+      "description": "当用户要求做代码 review 时，用于分析变更风险、行为回归和缺失测试，并输出按严重级别排序的问题清单。",
+      "tags": [
+        "review",
+        "quality"
+      ],
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "id": "release-changelog-builder",
+      "name": "release-changelog-builder",
+      "version": "0.1.0",
+      "owner": "release",
+      "status": "active",
+      "description": "当用户准备发版并请求整理变更说明时，用于汇总 commit 与功能点，生成结构化 changelog 与发布备注。",
+      "tags": [
+        "release",
+        "docs"
+      ],
+      "files": [
+        "SKILL.md"
+      ]
+    },
+    {
+      "id": "spec-proposal-writer",
+      "name": "spec-proposal-writer",
+      "version": "0.1.0",
+      "owner": "platform",
+      "status": "active",
+      "description": "当用户请求生成 OpenSpec proposal/design/tasks 时，用于分析需求边界并生成可执行的变更草案。",
+      "tags": [
+        "openspec",
+        "planning"
+      ],
+      "files": [
+        "SKILL.md"
+      ]
+    }
+  ]
+}

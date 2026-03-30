@@ -3,7 +3,7 @@ import type { MetaFunction } from 'react-router';
 import { reportBootError, reportBootReady, reportBootStage } from '../boot';
 import { ConsoleNav } from '../components/ConsoleNav';
 
-interface SkillItem {
+interface WorkspaceSkillItem {
   id: string;
   name: string;
   version: string;
@@ -15,49 +15,40 @@ interface SkillItem {
   testsCount: number;
   updatedAt: number;
   root?: string;
-  source?: string;
-  sourceRoot?: string;
+}
+
+interface LinkedAgentStatus {
+  agent: string;
+  targetPath: string;
+  valid: boolean;
 }
 
 interface InstalledSkillItem {
-  id: string;
-  version: string;
-  sourceType: string;
-  sourcePath: string;
-  installedAt: number;
-  root: string;
-  linkedAgents: Array<{
-    agent: string;
-    targetPath: string;
-    mode: string;
-    linkedAt: number;
-    valid: boolean;
-  }>;
+  name: string;
+  canonicalPath: string;
+  scope: 'project' | 'global';
+  pluginName?: string;
+  source?: string;
+  sourceType?: string;
+  installedAt?: string;
+  updatedAt?: string;
+  linkedAgents: LinkedAgentStatus[];
 }
 
 interface SkillsPayload {
   version: number;
-  items: SkillItem[];
+  items: WorkspaceSkillItem[];
   root?: string;
-  officialRoot?: string;
-  officialItems?: SkillItem[];
-  installedDir?: string;
-  installedItems?: InstalledSkillItem[];
+  projectInstalledItems?: InstalledSkillItem[];
+  globalInstalledItems?: InstalledSkillItem[];
 }
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: 'HS Console - Skills' },
-    { name: 'description', content: 'HS Console skills module' }
-  ];
-};
+export const meta: MetaFunction = () => [
+  { title: 'HS Console - Skills' },
+  { name: 'description', content: 'HS Console skills module' }
+];
 
-function formatTime(ts?: number): string {
-  if (!ts) return '-';
-  const d = new Date(ts);
-  if (Number.isNaN(d.getTime())) return '-';
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-}
+type Section = 'workspace' | 'project' | 'global';
 
 async function fetchSkills(): Promise<SkillsPayload> {
   const res = await fetch('/api/skills', { headers: { 'Content-Type': 'application/json' } });
@@ -66,20 +57,77 @@ async function fetchSkills(): Promise<SkillsPayload> {
   return data;
 }
 
+function formatTime(ts?: number | string): string {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '-';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function AgentBadge({ linked }: { linked: LinkedAgentStatus }) {
+  return (
+    <span
+      className={`skills-installed__badge ${linked.valid ? 'is-valid' : 'is-invalid'}`}
+      title={linked.targetPath}
+    >
+      {linked.agent} · {linked.valid ? 'ok' : 'broken'}
+    </span>
+  );
+}
+
+function InstalledCard({ item }: { item: InstalledSkillItem }) {
+  const hasInvalid = item.linkedAgents.some((l) => !l.valid);
+  return (
+    <article className="skills-installed__card">
+      <div className="skills-installed__title">
+        <strong>{item.name}</strong>
+        {item.pluginName && <span className="skills-installed__plugin">plugin: {item.pluginName}</span>}
+      </div>
+      {item.source && (
+        <div className="skills-installed__meta">
+          {item.sourceType ?? 'source'}: {item.source}
+        </div>
+      )}
+      {(item.installedAt || item.updatedAt) && (
+        <div className="skills-installed__meta">
+          {item.installedAt ? `installed: ${formatTime(item.installedAt)}` : ''}
+          {item.installedAt && item.updatedAt ? '  ·  ' : ''}
+          {item.updatedAt ? `updated: ${formatTime(item.updatedAt)}` : ''}
+        </div>
+      )}
+      <div className="skills-installed__path" title={item.canonicalPath}>
+        {item.canonicalPath}
+      </div>
+      <div className="skills-installed__links">
+        {item.linkedAgents.length === 0 ? (
+          <span className="skills-installed__badge is-warning">未链接任何 agent</span>
+        ) : (
+          item.linkedAgents.map((linked) => (
+            <AgentBadge key={`${item.name}-${linked.agent}`} linked={linked} />
+          ))
+        )}
+      </div>
+      {hasInvalid && (
+        <div className="skills-installed__hint">
+          链接失效，可重新执行：<code>npx skills add {item.source ?? item.canonicalPath}</code>
+        </div>
+      )}
+    </article>
+  );
+}
+
 export default function SkillsPage() {
-  const [items, setItems] = useState<SkillItem[]>([]);
-  const [officialItems, setOfficialItems] = useState<SkillItem[]>([]);
-  const [installedItems, setInstalledItems] = useState<InstalledSkillItem[]>([]);
+  const [workspaceItems, setWorkspaceItems] = useState<WorkspaceSkillItem[]>([]);
+  const [projectInstalledItems, setProjectInstalledItems] = useState<InstalledSkillItem[]>([]);
+  const [globalInstalledItems, setGlobalInstalledItems] = useState<InstalledSkillItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [version, setVersion] = useState(0);
-  const [rootDir, setRootDir] = useState('');
-  const [officialRootDir, setOfficialRootDir] = useState('');
-  const [installedDir, setInstalledDir] = useState('');
+  const [workspaceRoot, setWorkspaceRoot] = useState('');
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'updated' | 'name'>('updated');
-  const [activeSection, setActiveSection] = useState<'official' | 'installed' | 'workspace'>('official');
-  const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
+  const [activeSection, setActiveSection] = useState<Section>('workspace');
+  const [activeSkill, setActiveSkill] = useState<WorkspaceSkillItem | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -88,13 +136,11 @@ export default function SkillsPage() {
     reportBootStage('读取 skills 数据');
     try {
       const payload = await fetchSkills();
-      setItems(Array.isArray(payload.items) ? payload.items : []);
-      setOfficialItems(Array.isArray(payload.officialItems) ? payload.officialItems : []);
-      setInstalledItems(Array.isArray(payload.installedItems) ? payload.installedItems : []);
+      setWorkspaceItems(Array.isArray(payload.items) ? payload.items : []);
+      setProjectInstalledItems(Array.isArray(payload.projectInstalledItems) ? payload.projectInstalledItems : []);
+      setGlobalInstalledItems(Array.isArray(payload.globalInstalledItems) ? payload.globalInstalledItems : []);
       setVersion(payload.version || 0);
-      setRootDir(String(payload.root || ''));
-      setOfficialRootDir(String(payload.officialRoot || ''));
-      setInstalledDir(String(payload.installedDir || ''));
+      setWorkspaceRoot(String(payload.root || ''));
       reportBootStage('渲染 skills 列表');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '加载 skills 失败';
@@ -106,65 +152,65 @@ export default function SkillsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  const filteredOfficial = useMemo(() => {
-    const key = query.trim().toLowerCase();
-    const base = officialItems.filter((item) => {
-      if (!key) return true;
-      return [item.id, item.version, item.owner, item.status, item.description].some((field) =>
-        String(field || '').toLowerCase().includes(key)
-      );
-    });
-    return [...base].sort((a, b) => {
-      if (sortBy === 'name') return String(a.name || '').localeCompare(String(b.name || ''));
-      return (b.updatedAt || 0) - (a.updatedAt || 0);
-    });
-  }, [officialItems, query, sortBy]);
+  const filterWorkspace = useCallback((items: WorkspaceSkillItem[], key: string) => {
+    if (!key) return items;
+    return items.filter((item) =>
+      [item.id, item.name, item.description, item.owner, item.status, item.version].some(
+        (f) => String(f || '').toLowerCase().includes(key)
+      )
+    );
+  }, []);
+
+  const filterInstalled = useCallback((items: InstalledSkillItem[], key: string) => {
+    if (!key) return items;
+    return items.filter((item) =>
+      [item.name, item.source, item.pluginName].some(
+        (f) => String(f || '').toLowerCase().includes(key)
+      )
+    );
+  }, []);
 
   const filteredWorkspace = useMemo(() => {
     const key = query.trim().toLowerCase();
-    const base = items.filter((item) => {
-      if (!key) return true;
-      return [item.id, item.version, item.owner, item.status, item.description].some((field) =>
-        String(field || '').toLowerCase().includes(key)
-      );
-    });
-    return [...base].sort((a, b) => {
-      if (sortBy === 'name') return String(a.name || '').localeCompare(String(b.name || ''));
-      return (b.updatedAt || 0) - (a.updatedAt || 0);
-    });
-  }, [items, query, sortBy]);
+    const base = filterWorkspace(workspaceItems, key);
+    return [...base].sort((a, b) =>
+      sortBy === 'name' ? a.name.localeCompare(b.name) : (b.updatedAt || 0) - (a.updatedAt || 0)
+    );
+  }, [workspaceItems, query, sortBy, filterWorkspace]);
 
-  const filteredInstalled = useMemo(() => {
+  const filteredProject = useMemo(() => {
     const key = query.trim().toLowerCase();
-    const base = installedItems.filter((item) => {
-      if (!key) return true;
-      return [item.id, item.version, item.sourceType, item.sourcePath].some((field) =>
-        String(field || '').toLowerCase().includes(key)
-      );
-    });
-    return [...base].sort((a, b) => {
-      if (sortBy === 'name') return String(a.id || '').localeCompare(String(b.id || ''));
-      return (b.installedAt || 0) - (a.installedAt || 0);
-    });
-  }, [installedItems, query, sortBy]);
+    const base = filterInstalled(projectInstalledItems, key);
+    return [...base].sort((a, b) =>
+      sortBy === 'name' ? a.name.localeCompare(b.name) : a.name.localeCompare(b.name)
+    );
+  }, [projectInstalledItems, query, sortBy, filterInstalled]);
 
-  const installedSummary = useMemo(() => {
-    const totalLinks = installedItems.reduce((sum, item) => sum + item.linkedAgents.length, 0);
-    const invalidLinks = installedItems.reduce((sum, item) => sum + item.linkedAgents.filter((linked) => !linked.valid).length, 0);
-    return {
-      installed: installedItems.length,
-      linked: totalLinks,
-      invalid: invalidLinks
-    };
-  }, [installedItems]);
+  const filteredGlobal = useMemo(() => {
+    const key = query.trim().toLowerCase();
+    const base = filterInstalled(globalInstalledItems, key);
+    return [...base].sort((a, b) =>
+      sortBy === 'name' ? a.name.localeCompare(b.name) : (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '')
+    );
+  }, [globalInstalledItems, query, sortBy, filterInstalled]);
 
-  const installedLookup = useMemo(() => {
-    return new Map(installedItems.map((item) => [item.id, item]));
-  }, [installedItems]);
+  const invalidProjectCount = useMemo(
+    () => projectInstalledItems.reduce((n, item) => n + item.linkedAgents.filter((l) => !l.valid).length, 0),
+    [projectInstalledItems]
+  );
+
+  const invalidGlobalCount = useMemo(
+    () => globalInstalledItems.reduce((n, item) => n + item.linkedAgents.filter((l) => !l.valid).length, 0),
+    [globalInstalledItems]
+  );
+
+  const sectionCount = (s: Section) => {
+    if (s === 'workspace') return filteredWorkspace.length;
+    if (s === 'project') return filteredProject.length;
+    return filteredGlobal.length;
+  };
 
   return (
     <>
@@ -184,7 +230,7 @@ export default function SkillsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="skills-search"
-            placeholder="搜索名称/描述/状态/版本"
+            placeholder="搜索名称 / 描述 / 来源"
           />
           <select className="skills-select" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'updated' | 'name')}>
             <option value="updated">排序: 最近更新</option>
@@ -195,79 +241,73 @@ export default function SkillsPage() {
 
         <section className="skills-summary">
           <div className="skills-summary__item">
-            <span>HS CLI Skills</span>
-            <strong>{officialItems.length}</strong>
+            <span>Workspace Skills</span>
+            <strong>{workspaceItems.length}</strong>
           </div>
           <div className="skills-summary__item">
-            <span>installed skills</span>
-            <strong>{installedSummary.installed}</strong>
+            <span>项目已安装</span>
+            <strong>{projectInstalledItems.length}</strong>
           </div>
           <div className="skills-summary__item">
-            <span>linked agents</span>
-            <strong>{installedSummary.linked}</strong>
+            <span>全局已安装</span>
+            <strong>{globalInstalledItems.length}</strong>
           </div>
           <div className="skills-summary__item">
-            <span>invalid links</span>
-            <strong>{installedSummary.invalid}</strong>
+            <span>失效链接</span>
+            <strong style={{ color: (invalidProjectCount + invalidGlobalCount) > 0 ? 'var(--color-error, #e53)' : undefined }}>
+              {invalidProjectCount + invalidGlobalCount}
+            </strong>
           </div>
         </section>
 
         <section className="skills-shell">
           <aside className="skills-sidebar">
             <div className="skills-sidebar__group">
-              <button
-                type="button"
-                className={`skills-sidebar__item ${activeSection === 'official' ? 'is-active' : ''}`}
-                onClick={() => setActiveSection('official')}
-              >
-                <span>HS CLI Skills</span>
-                <strong>{officialItems.length}</strong>
-              </button>
-              <button
-                type="button"
-                className={`skills-sidebar__item ${activeSection === 'installed' ? 'is-active' : ''}`}
-                onClick={() => setActiveSection('installed')}
-              >
-                <span>已安装</span>
-                <strong>{installedSummary.installed}</strong>
-              </button>
+              {(['workspace', 'project', 'global'] as Section[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={`skills-sidebar__item ${activeSection === s ? 'is-active' : ''}`}
+                  onClick={() => setActiveSection(s)}
+                >
+                  <span>
+                    {s === 'workspace' ? 'Workspace' : s === 'project' ? '项目已安装' : '全局已安装'}
+                  </span>
+                  <strong>{sectionCount(s)}</strong>
+                </button>
+              ))}
             </div>
-            <div className="skills-sidebar__group skills-sidebar__group--secondary">
-              <div className="skills-sidebar__caption">更多</div>
-              <button
-                type="button"
-                className={`skills-sidebar__item skills-sidebar__item--secondary ${activeSection === 'workspace' ? 'is-active' : ''}`}
-                onClick={() => setActiveSection('workspace')}
-              >
-                <span>Workspace</span>
-                <strong>{items.length}</strong>
-              </button>
-            </div>
+
             <div className="skills-sidebar__group">
-              <div className="skills-sidebar__path">
-                <span>official</span>
-                <code>{officialRootDir || '-'}</code>
-              </div>
-              <div className="skills-sidebar__path">
-                <span>installed</span>
-                <code>{installedDir || '-'}</code>
-              </div>
-              {activeSection === 'workspace' ? (
+              {activeSection === 'workspace' && workspaceRoot && (
                 <div className="skills-sidebar__path">
                   <span>workspace</span>
-                  <code>{rootDir || '-'}</code>
+                  <code>{workspaceRoot}</code>
                 </div>
-              ) : null}
+              )}
+              {activeSection === 'project' && (
+                <div className="skills-sidebar__path">
+                  <span>canonical</span>
+                  <code>.agents/skills/</code>
+                </div>
+              )}
+              {activeSection === 'global' && (
+                <div className="skills-sidebar__path">
+                  <span>canonical</span>
+                  <code>~/.agents/skills/</code>
+                </div>
+              )}
             </div>
+
             <div className="skills-sidebar__group">
               <div className="skills-install__hint">
-                <code>hs-cli skills list --scope official</code>
+                <code>hs-cli skills new &lt;name&gt;</code>
               </div>
               <div className="skills-install__hint">
-                <code>hs-cli skills add &lt;skill-or-source&gt;</code>
+                <code>hs-cli skills lint [name]</code>
               </div>
               <div className="skills-install__hint">
-                <code>hs-cli skills doctor</code>
+                <code>npx skills add &lt;source&gt;</code>
               </div>
             </div>
           </aside>
@@ -275,124 +315,16 @@ export default function SkillsPage() {
           <section className="skills-panel">
             <header className="skills-panel__head">
               <h2>
-                {activeSection === 'official'
-                  ? 'HS CLI Skills'
-                  : activeSection === 'installed'
-                    ? '已安装 Skills'
-                    : 'Workspace Skills'}
+                {activeSection === 'workspace' ? 'Workspace Skills' : activeSection === 'project' ? '项目已安装 Skills' : '全局已安装 Skills'}
               </h2>
-              <span className="skills-meta">
-                {activeSection === 'official'
-                  ? `${filteredOfficial.length} 项`
-                  : activeSection === 'installed'
-                    ? `${filteredInstalled.length} 项`
-                    : `${filteredWorkspace.length} 项`}
-              </span>
+              <span className="skills-meta">{sectionCount(activeSection)} 项</span>
             </header>
 
-            {activeSection === 'official' ? (
-              !loading && filteredOfficial.length === 0 ? (
-                <div className="skills-empty">当前没有可展示的 HS CLI skills。</div>
-              ) : (
-                <div className="skills-list">
-                  {filteredOfficial.map((item) => (
-                    <article key={item.id} className="skill-card">
-                      <header className="skill-card__head">
-                        <div className="skill-card__title-wrap">
-                          <div className="skill-card__title">{item.name}</div>
-                          <div className={`skill-card__source skill-card__source--${item.source || 'official'}`}>{item.source || 'official'}</div>
-                        </div>
-                        <div className="skill-card__tag">{item.status || 'unknown'}</div>
-                      </header>
-                      <div className="skill-card__status-row">
-                        {(() => {
-                          const installed = installedLookup.get(item.id);
-                          if (!installed) {
-                            return <span className="skills-installed__badge">未安装</span>;
-                          }
-                          const hasBroken = installed.linkedAgents.some((linked) => !linked.valid);
-                          if (installed.linkedAgents.length === 0) {
-                            return <span className="skills-installed__badge is-warning">已安装 · 未链接</span>;
-                          }
-                          return (
-                            <span className={`skills-installed__badge ${hasBroken ? 'is-invalid' : 'is-valid'}`}>
-                              已安装 · {hasBroken ? 'broken' : 'codex ok'}
-                            </span>
-                          );
-                        })()}
-                      </div>
-                      <div className="skill-card__desc">{item.description || '暂无描述'}</div>
-                      <div className="skill-card__meta">
-                        <span>v{item.version || '0.0.0'}</span>
-                        <span>owner: {item.owner || '-'}</span>
-                        <span>examples: {item.examplesCount}</span>
-                        <span>tests: {item.testsCount}</span>
-                        <span>updated: {formatTime(item.updatedAt)}</span>
-                      </div>
-                      <div className="skill-card__root" title={item.root || item.sourceRoot || '-'}>
-                        install: hs-cli skills add {item.id}
-                      </div>
-                      <div className="skill-card__actions">
-                        <button type="button" className="skill-card__action-btn" onClick={() => setActiveSkill(item)}>
-                          详情
-                        </button>
-                        <button
-                          type="button"
-                          className="skill-card__action-btn"
-                          onClick={() => {
-                            void navigator.clipboard?.writeText(`hs-cli skills add ${item.id}`);
-                          }}
-                        >
-                          复制安装命令
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )
-            ) : null}
-
-            {activeSection === 'installed' ? (
-              filteredInstalled.length === 0 ? (
-                <div className="skills-empty">
-                  当前没有已安装 skills。先执行 <code>hs-cli skills add &lt;skill-or-source&gt;</code>。
-                </div>
-              ) : (
-                <div className="skills-installed__list">
-                  {filteredInstalled.map((item) => (
-                    <article key={item.id} className="skills-installed__card">
-                      <div className="skills-installed__title">
-                        <strong>{item.id}</strong>
-                        <span>v{item.version || '0.0.0'}</span>
-                      </div>
-                      <div className="skills-installed__meta">source: {item.sourceType} · installed: {formatTime(item.installedAt)}</div>
-                      <div className="skills-installed__path" title={item.root}>{item.root}</div>
-                      <div className="skills-installed__path" title={item.sourcePath}>from: {item.sourcePath}</div>
-                      <div className="skills-installed__links">
-                        {item.linkedAgents.length === 0 ? (
-                          <span className="skills-installed__badge is-warning">未链接</span>
-                        ) : (
-                          item.linkedAgents.map((linked) => (
-                            <span
-                              key={`${item.id}-${linked.agent}`}
-                              className={`skills-installed__badge ${linked.valid ? 'is-valid' : 'is-invalid'}`}
-                              title={linked.targetPath}
-                            >
-                              {linked.agent} · {linked.valid ? 'ok' : 'broken'}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )
-            ) : null}
-
+            {/* Workspace */}
             {activeSection === 'workspace' ? (
               !loading && filteredWorkspace.length === 0 ? (
                 <div className="skills-empty">
-                  当前目录没有可展示的 skills。请确认当前目录或使用 <code>hs-cli console skills --skills-dir &lt;path&gt;</code> 指定目录。
+                  当前工作区未发现 skills。请确认 <code>skills/</code> 目录存在，或使用 <code>hs-cli skills new &lt;name&gt;</code> 创建。
                 </div>
               ) : (
                 <div className="skills-list">
@@ -401,7 +333,8 @@ export default function SkillsPage() {
                       <header className="skill-card__head">
                         <div className="skill-card__title-wrap">
                           <div className="skill-card__title">{item.name}</div>
-                          <div className={`skill-card__source skill-card__source--${item.source || 'workspace'}`}>{item.source || 'workspace'}</div>
+                          <div className="skill-card__source skill-card__source--workspace">workspace</div>
+                        </div>
                         </div>
                         <div className="skill-card__tag">{item.status || 'unknown'}</div>
                       </header>
@@ -414,9 +347,6 @@ export default function SkillsPage() {
                         <span>SKILL.md: {item.hasSkillDoc ? 'yes' : 'no'}</span>
                         <span>updated: {formatTime(item.updatedAt)}</span>
                       </div>
-                      <div className="skill-card__root" title={item.root || item.sourceRoot || '-'}>
-                        root: {item.root || item.sourceRoot || '-'}
-                      </div>
                       <div className="skill-card__actions">
                         <button type="button" className="skill-card__action-btn" onClick={() => setActiveSkill(item)}>
                           详情
@@ -425,16 +355,43 @@ export default function SkillsPage() {
                           type="button"
                           className="skill-card__action-btn"
                           onClick={() => {
-                            const targetPath = item.root || item.sourceRoot;
-                            if (targetPath) {
-                              void navigator.clipboard?.writeText(targetPath);
-                            }
+                            void navigator.clipboard?.writeText(`npx skills add ${item.root ?? `./skills/${item.id}`}`);
                           }}
                         >
-                          复制路径
+                          复制安装命令
                         </button>
                       </div>
                     </article>
+                  ))}
+                </div>
+              )
+            ) : null}
+
+            {/* 项目已安装 */}
+            {activeSection === 'project' ? (
+              !loading && filteredProject.length === 0 ? (
+                <div className="skills-empty">
+                  当前项目未安装任何 skills。执行 <code>npx skills add &lt;source&gt;</code> 安装。
+                </div>
+              ) : (
+                <div className="skills-installed__list">
+                  {filteredProject.map((item) => (
+                    <InstalledCard key={item.name} item={item} />
+                  ))}
+                </div>
+              )
+            ) : null}
+
+            {/* 全局已安装 */}
+            {activeSection === 'global' ? (
+              !loading && filteredGlobal.length === 0 ? (
+                <div className="skills-empty">
+                  全局未安装任何 skills。执行 <code>npx skills add &lt;source&gt; -g</code> 安装。
+                </div>
+              ) : (
+                <div className="skills-installed__list">
+                  {filteredGlobal.map((item) => (
+                    <InstalledCard key={item.name} item={item} />
                   ))}
                 </div>
               )
@@ -455,9 +412,7 @@ export default function SkillsPage() {
                     <span>status: {activeSkill.status || 'unknown'}</span>
                   </div>
                 </div>
-                <button className="skill-detail__close" onClick={() => setActiveSkill(null)}>
-                  关闭
-                </button>
+                <button className="skill-detail__close" onClick={() => setActiveSkill(null)}>关闭</button>
               </header>
               <section className="skill-detail__section">
                 <h3>描述</h3>
@@ -475,19 +430,16 @@ export default function SkillsPage() {
               </section>
               <section className="skill-detail__section">
                 <h3>路径</h3>
-                <div className="skill-detail__path">{activeSkill.root || activeSkill.sourceRoot || '-'}</div>
+                <div className="skill-detail__path">{activeSkill.root || '-'}</div>
               </section>
               <footer className="skill-detail__actions">
                 <button
                   className="skill-card__action-btn"
                   onClick={() => {
-                    const targetPath = activeSkill.root || activeSkill.sourceRoot;
-                    if (targetPath) {
-                      void navigator.clipboard?.writeText(targetPath);
-                    }
+                    void navigator.clipboard?.writeText(`npx skills add ${activeSkill.root ?? `./skills/${activeSkill.id}`}`);
                   }}
                 >
-                  复制路径
+                  复制安装命令
                 </button>
               </footer>
             </aside>

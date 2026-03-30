@@ -51,9 +51,8 @@ program.addHelpText('after', `
   $ npx hs-cli console --ui web
   $ npx hs-cli console openspec --ui web
   $ npx hs-cli skills new my-skill
-  $ npx hs-cli skills list --scope official
-  $ npx hs-cli skills add my-skill
-  $ npx hs-cli skills list --scope installed
+  $ npx hs-cli skills lint my-skill
+  $ npx hs-cli skills list
 `);
 
 /**

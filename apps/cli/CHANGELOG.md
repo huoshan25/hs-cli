@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.3.0] - 2026-03-30
+
+### 新增
+
+- 新增 `apps/skills-site` 静态站点，基于 Vite + React + Tailwind CSS
+  - 实现 Well-Known 协议（`/.well-known/agent-skills/index.json`），支持 `npx skills add https://your-domain.com --skill <name>` 安装
+  - skill 列表页（搜索过滤）+ 详情页（含一键复制安装命令）
+  - 构建脚本自动从 `packages/skills/` 读取内容生成静态数据
+- Console 面板 Skills 模块新增已安装 skill 展示
+  - 读取 `.agents/skills/`（项目级）和 `~/.agents/skills/`（全局）目录
+  - 读取 `skills-lock.json` 和 `~/.agents/.skill-lock.json` 展示安装来源与时间
+  - 展示各 agent 链接状态（valid / broken）
+
+### 重构
+
+- Skills 安装分发体系重构：废弃 hs-cli 自研的 `add/remove/link/doctor` 命令，改为委托给 `npx skills`（vercel-labs/agent-skills）
+- `skills/` 目录从仓库根目录迁移至 `packages/skills/`，纳入 monorepo 统一管理
+- `hs-cli skills new` 改为动态查找 workspace skills 根目录，不再硬编码路径
+- 删除 `copy-skills-official` 构建脚本，CLI 包不再内置 skill 文件
+
+### 修复
+
+- 修复 `skills new` 创建后提示的安装命令路径错误问题
+
+### 文档
+
+- 新增 `docs/npx-skills-research.md`：npx skills 工具安装来源格式与最佳实践研究报告
+- 更新根目录 `README.md` 仓库结构图，补充 `apps/skills-site` 和 `packages/skills` 说明
+- 更新 `apps/cli/README.md` Skills 使用模型，对齐新的分工设计
+
 ## [0.2.0] - 2026-03-21
 
 ### 新增

@@ -3,24 +3,6 @@ import fs from 'fs-extra';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { collectSkills, locateWorkspaceSkillsRoot } from '../util/skills-sources';
-import { collectOfficialSkills, resolveOfficialSkillsRoot } from '../util/skills-official';
-import { cloneGitSkillSource, isGitSkillSource } from '../util/skills-git';
-import {
-  type InstalledSkillLock,
-  getInstalledSkillRoot,
-  installSkillFromSource,
-  listInstalledSkillLocks,
-  readInstalledSkillLock,
-  resolveInstalledSkillsDir,
-  writeInstalledSkillLock
-} from '../util/skills-installed';
-import {
-  getSupportedSkillAgents,
-  inspectAgentLink,
-  linkInstalledSkillToAgent,
-  removeInstalledSkillLink,
-  type SkillAgent
-} from '../util/skills-agent-adapters';
 
 interface SkillMetadata {
   name: string;
@@ -33,8 +15,7 @@ interface LintIssue {
   message: string;
 }
 
-const SKILLS_DIR = 'skills';
-const TEMPLATE_DIR = path.join(SKILLS_DIR, 'templates', 'skill-template');
+const TEMPLATE_SUBDIR = path.join('templates', 'skill-template');
 const REQUIRED_FILES = ['SKILL.md', 'metadata.yaml'];
 const REQUIRED_DIRS = ['examples', 'tests'];
 const DESCRIPTION_MIN_LENGTH = 20;
@@ -80,12 +61,14 @@ const DESCRIPTION_GENERIC_PHRASES = [
 ];
 
 export function skillsCommand(program: Command): void {
-  const skills = program.command('skills').description('AI skills 工具集管理');
+  const skills = program
+    .command('skills')
+    .description('AI skill 作者侧工具：创建、校验、查看工作区 skills');
 
   skills
     .command('new')
     .description('基于模板创建新 skill')
-    .argument('<name>', 'skill 名称，仅允许字母数字和短横线')
+    .argument('<name>', 'skill 名称，仅允许小写字母、数字和短横线')
     .action(async (name: string) => {
       if (!/^[a-z0-9-]+$/.test(name)) {
         console.error(chalk.red('skill 名称仅允许小写字母、数字和短横线'));
@@ -93,8 +76,10 @@ export function skillsCommand(program: Command): void {
       }
 
       const cwd = process.cwd();
-      const templatePath = path.join(cwd, TEMPLATE_DIR);
-      const targetPath = path.join(cwd, SKILLS_DIR, name);
+      const skillsRoot = locateWorkspaceSkillsRoot(cwd);
+      const templatePath = path.join(skillsRoot, TEMPLATE_SUBDIR);
+      const targetPath = path.join(skillsRoot, name);
+      const relTarget = path.relative(cwd, targetPath);
 
       if (!fs.existsSync(templatePath)) {
         console.error(chalk.red(`未找到 skill 模板目录: ${templatePath}`));
@@ -109,60 +94,28 @@ export function skillsCommand(program: Command): void {
       await fs.copy(templatePath, targetPath);
       await replaceSkillNamePlaceholder(targetPath, name);
 
-      console.log(chalk.green(`已创建 skill: ${path.join(SKILLS_DIR, name)}`));
+      console.log(chalk.green(`✓ 已创建 skill: ${relTarget}`));
+      console.log(`\n安装到 AI 客户端（使用 npx skills）:`);
+      console.log(`  npx skills add ${targetPath} --agent claude-code`);
+      console.log(`  npx skills add ${targetPath} --agent codex`);
     });
 
   skills
     .command('list')
-    .description('列出 skills，可查看当前工作区、官方内置或已安装列表（--scope workspace|official|installed）')
-    .option('--scope <scope>', '范围: workspace | official | installed', 'workspace')
-    .action(async (options: { scope?: string }) => {
-      const scope = String(options.scope || 'workspace').trim().toLowerCase();
-      if (scope === 'installed') {
-        const installed = await listInstalledSkillLocks();
-        if (installed.length === 0) {
-          console.log(chalk.yellow('当前没有已安装 skills'));
-          return;
-        }
-
-        for (const entry of installed) {
-          console.log(`- ${entry.lock.id}  v${entry.lock.version}`);
-          console.log(`  source: ${entry.lock.sourceType}  ${entry.lock.sourcePath}`);
-          console.log(`  installed: ${entry.root}`);
-          console.log(`  linked: ${entry.lock.linkedAgents.map((item) => item.agent).join(', ') || '-'}`);
-        }
-        return;
-      }
-
-      if (scope === 'official') {
-        const officialSkills = collectOfficialSkills();
-        if (officialSkills.items.length === 0) {
-          console.log(chalk.yellow('当前没有可用的官方内置 skills'));
-          console.log(`official root: ${officialSkills.root}`);
-          return;
-        }
-
-        console.log(`official root: ${officialSkills.root}`);
-        for (const item of officialSkills.items) {
-          console.log(`- ${item.name}  v${item.version}`);
-          console.log(`  ${item.description}`);
-          console.log(`  root: ${item.root}`);
-        }
-        return;
-      }
-
-      if (scope !== 'workspace') {
-        console.error(chalk.red(`无效 scope: ${options.scope}. 仅支持 workspace | official | installed`));
-        process.exit(1);
-      }
-
+    .description('列出当前工作区所有 skills')
+    .action(async () => {
       const cwd = process.cwd();
-      const workspaceSkills = collectSkills({ cwd }).items.filter((item) => item.source === 'workspace');
+      const workspaceSkills = collectSkills({ cwd }).items.filter(
+        (item) => item.source === 'workspace'
+      );
+
       if (workspaceSkills.length === 0) {
         console.log(chalk.yellow('当前工作区未发现可用 skills'));
+        console.log(`hint: skills 应放在 ${locateWorkspaceSkillsRoot(cwd)} 目录下`);
         return;
       }
 
+      console.log(`workspace: ${locateWorkspaceSkillsRoot(cwd)}\n`);
       for (const item of workspaceSkills) {
         console.log(`- ${item.name}  v${item.version}`);
         console.log(`  ${item.description}`);
@@ -171,26 +124,12 @@ export function skillsCommand(program: Command): void {
     });
 
   skills
-    .command('add')
-    .description('用户侧主命令：安装 skill 到全局目录，并默认链接到 Codex')
-    .argument('<source>', 'skill 目录路径，或当前工作区 skills 下的 skill 名称')
-    .option('--agent <agent>', `安装后自动链接到的客户端，默认 codex，可选: ${getSupportedSkillAgents().join(' | ')}`, 'codex')
-    .option('--no-link', '只安装，不自动链接到 agent')
-    .action(async (input: string, options: { agent?: string; link?: boolean }) => {
-      await addSkillFromInput(input, {
-        cwd: process.cwd(),
-        agent: normalizeAgent(options.agent),
-        autoLink: options.link !== false
-      });
-    });
-
-  skills
     .command('lint')
-    .description('校验当前工作区 skill 目录结构与 description 质量')
-    .argument('[name]', '只校验指定 skill 名称')
+    .description('校验工作区 skill 目录结构与 description 质量')
+    .argument('[name]', '只校验指定 skill，不传则校验全部')
     .action(async (name?: string) => {
       const cwd = process.cwd();
-      const skillsRoot = path.join(cwd, SKILLS_DIR);
+      const skillsRoot = locateWorkspaceSkillsRoot(cwd);
       const targetSkills = name ? [name] : await getSkillDirectories(skillsRoot);
 
       if (targetSkills.length === 0) {
@@ -217,302 +156,6 @@ export function skillsCommand(program: Command): void {
 
       console.log(chalk.green(`✓ 校验通过，共 ${targetSkills.length} 个 skill`));
     });
-
-  skills
-    .command('install')
-    .description('将 workspace 或本地目录中的 skill 安装到用户目录')
-    .argument('<source>', 'skill 目录路径，或当前工作区 skills 下的 skill 名称')
-    .option('--agent <agent>', `安装后自动链接到的客户端，默认 codex，可选: ${getSupportedSkillAgents().join(' | ')}`, 'codex')
-    .option('--no-link', '只安装，不自动链接到 agent')
-    .action(async (input: string, options: { agent?: string; link?: boolean }) => {
-      await addSkillFromInput(input, {
-        cwd: process.cwd(),
-        agent: normalizeAgent(options.agent),
-        autoLink: options.link !== false
-      });
-    });
-
-  skills
-    .command('remove')
-    .description('移除已安装 skill，并清理相关 agent link')
-    .argument('<name>', '已安装 skill 名称')
-    .action(async (name: string) => {
-      const lock = await readInstalledSkillLock(name);
-      if (!lock) {
-        console.log(chalk.yellow(`未找到已安装 skill: ${name}`));
-        return;
-      }
-
-      for (const linked of lock.linkedAgents) {
-        await removeInstalledSkillLink(lock.id, linked.agent as SkillAgent);
-      }
-
-      await fs.remove(getInstalledSkillRoot(name));
-      console.log(chalk.green(`已移除 skill: ${name}`));
-    });
-
-  skills
-    .command('link')
-    .description('将已安装 skill 链接到指定 AI 客户端目录')
-    .argument('<name>', '已安装 skill 名称')
-    .requiredOption('--agent <agent>', `目标客户端: ${getSupportedSkillAgents().join(' | ')}`)
-    .action(async (name: string, options: { agent?: string }) => {
-      const agent = normalizeAgent(options.agent);
-      const lock = await readInstalledSkillLock(name);
-      if (!lock) {
-        console.error(chalk.red(`未找到已安装 skill: ${name}`));
-        process.exit(1);
-      }
-
-      const installRoot = getInstalledSkillRoot(name);
-      const linked = await linkInstalledSkillToAgent(lock.id, installRoot, agent);
-      const nextLock = {
-        ...lock,
-        linkedAgents: [
-          ...lock.linkedAgents.filter((item) => item.agent !== agent),
-          linked
-        ]
-      } satisfies InstalledSkillLock;
-      await writeInstalledSkillLock(installRoot, nextLock);
-
-      console.log(chalk.green(`已链接 skill: ${name}`));
-      console.log(`agent: ${agent}`);
-      console.log(`target: ${linked.targetPath}`);
-      console.log(`mode: ${linked.mode}`);
-    });
-
-  skills
-    .command('doctor')
-    .description('检查已安装 skill、用户安装目录与 agent link 状态')
-    .action(async () => {
-      const installedDir = resolveInstalledSkillsDir();
-      const locks = await listInstalledSkillLocks();
-      console.log(`installed dir: ${installedDir}`);
-
-      if (locks.length === 0) {
-        console.log(chalk.yellow('当前没有已安装 skills'));
-        return;
-      }
-
-      let hasIssue = false;
-      for (const entry of locks) {
-        console.log(`\n[${entry.lock.id}] v${entry.lock.version}`);
-        console.log(`  source: ${entry.lock.sourceType} ${entry.lock.sourcePath}`);
-        console.log(`  install: ${entry.root}`);
-        if (!(await fs.pathExists(entry.root))) {
-          hasIssue = true;
-          console.log(chalk.red('  issue: 安装目录不存在'));
-          continue;
-        }
-
-        if (entry.lock.linkedAgents.length === 0) {
-          console.log(chalk.yellow('  warning: 尚未链接到任何 agent'));
-          continue;
-        }
-
-        for (const linked of entry.lock.linkedAgents) {
-          const info = await inspectAgentLink(entry.lock.id, linked.agent as SkillAgent);
-          if (!info.exists || !info.valid) {
-            hasIssue = true;
-            console.log(chalk.red(`  issue: ${linked.agent} link 异常 -> ${info.targetPath}`));
-            console.log(`  hint: 重新执行 hs-cli skills link ${entry.lock.id} --agent ${linked.agent}`);
-            continue;
-          }
-          console.log(chalk.green(`  ok: ${linked.agent} -> ${info.targetPath}`));
-        }
-      }
-
-      if (!hasIssue) {
-        console.log(chalk.green('\n✓ doctor 检查通过'));
-      }
-    });
-}
-
-async function addSkillFromInput(
-  input: string,
-  options: { cwd: string; agent: SkillAgent; autoLink: boolean }
-): Promise<void> {
-  const cwd = options.cwd;
-  const workspaceRoot = locateWorkspaceSkillsRoot(cwd);
-  const resolved = await resolveInstallSource(cwd, workspaceRoot, input);
-
-  try {
-    const skillName = path.basename(resolved.sourcePath);
-    const issues: LintIssue[] = [];
-    await collectLintIssues(skillName, resolved.sourcePath, issues);
-    if (issues.length > 0) {
-      for (const issue of issues) {
-        console.error(chalk.red(`✗ [${issue.skill}] ${issue.message}`));
-      }
-      process.exit(1);
-    }
-
-    const metadata = await readMetadata(path.join(resolved.sourcePath, 'metadata.yaml'));
-    if (!metadata) {
-      console.error(chalk.red('metadata.yaml 缺少 name/version/description 字段'));
-      process.exit(1);
-    }
-
-    if (!/^[a-z0-9-]+$/.test(metadata.name)) {
-      console.error(chalk.red(`metadata.name 无效: ${metadata.name}`));
-      process.exit(1);
-    }
-
-    const result = await installSkillFromSource({
-      sourcePath: resolved.sourcePath,
-      skillId: metadata.name,
-      version: metadata.version,
-      sourceType: resolved.sourceType,
-      sourceRef: resolved.sourceRef
-    });
-
-    console.log(chalk.green(`已安装 skill: ${result.lock.id}`));
-    console.log(`source: ${resolved.sourceRef}`);
-    console.log(`target: ${result.installDir}`);
-    console.log(`installed dir: ${resolveInstalledSkillsDir()}`);
-
-    if (options.autoLink) {
-      const linked = await linkInstalledSkillToAgent(result.lock.id, result.installDir, options.agent);
-      const nextLock = {
-        ...result.lock,
-        linkedAgents: [
-          ...result.lock.linkedAgents.filter((item) => item.agent !== options.agent),
-          linked
-        ]
-      } satisfies InstalledSkillLock;
-      await writeInstalledSkillLock(result.installDir, nextLock);
-      console.log(chalk.green(`已自动链接到 ${options.agent}`));
-      console.log(`agent target: ${linked.targetPath}`);
-    } else {
-      console.log(chalk.yellow('未自动链接到 agent，可稍后执行:'));
-      console.log(`hs-cli skills link ${result.lock.id} --agent ${options.agent}`);
-    }
-  } finally {
-    await resolved.cleanup();
-  }
-}
-
-async function resolveInstallSource(
-  cwd: string,
-  workspaceRoot: string,
-  input: string
-): Promise<{
-  sourcePath: string;
-  sourceType: 'workspace' | 'local' | 'official' | 'git';
-  sourceRef: string;
-  cleanup: () => Promise<void>;
-}> {
-  const attempts = new Set<string>();
-  const rawInput = String(input || '').trim();
-  const officialRoot = resolveOfficialSkillsRoot();
-
-  if (isGitSkillSource(rawInput)) {
-    const gitSource = await cloneGitSkillSource(rawInput);
-    return {
-      sourcePath: gitSource.sourcePath,
-      sourceType: 'git',
-      sourceRef: rawInput,
-      cleanup: gitSource.cleanup
-    };
-  }
-
-  const directPath = path.resolve(cwd, rawInput);
-  attempts.add(directPath);
-  if (await isDirectory(directPath)) {
-    return {
-      sourcePath: directPath,
-      sourceType: detectInstallSourceType(directPath, workspaceRoot),
-      sourceRef: directPath,
-      cleanup: async () => {}
-    };
-  }
-
-  if (!path.isAbsolute(rawInput)) {
-    const workspaceProjectRoot = path.dirname(workspaceRoot);
-    const workspaceRelativePath = path.resolve(workspaceProjectRoot, rawInput);
-    attempts.add(workspaceRelativePath);
-    if (await isDirectory(workspaceRelativePath)) {
-      return {
-        sourcePath: workspaceRelativePath,
-        sourceType: detectInstallSourceType(workspaceRelativePath, workspaceRoot),
-        sourceRef: workspaceRelativePath,
-        cleanup: async () => {}
-      };
-    }
-
-    const workspaceSkillPath = path.join(workspaceRoot, rawInput);
-    attempts.add(workspaceSkillPath);
-    if (await isDirectory(workspaceSkillPath)) {
-      return {
-        sourcePath: workspaceSkillPath,
-        sourceType: detectInstallSourceType(workspaceSkillPath, workspaceRoot),
-        sourceRef: workspaceSkillPath,
-        cleanup: async () => {}
-      };
-    }
-
-    const officialSkillPath = path.join(officialRoot, rawInput);
-    attempts.add(officialSkillPath);
-    if (await isDirectory(officialSkillPath)) {
-      return {
-        sourcePath: officialSkillPath,
-        sourceType: detectInstallSourceType(officialSkillPath, workspaceRoot),
-        sourceRef: officialSkillPath,
-        cleanup: async () => {}
-      };
-    }
-  }
-
-  console.error(chalk.red(`未找到可安装的 skill 目录: ${input}`));
-  console.error(`cwd: ${cwd}`);
-  console.error(`workspace skills root: ${workspaceRoot}`);
-  console.error('tried:');
-  for (const candidate of attempts) {
-    console.error(`- ${candidate}`);
-  }
-  console.error('hint:');
-  console.error('- 如果这是 CLI 内置的官方 skill，请先执行 `hs-cli skills list --scope official` 查看名称');
-  console.error('- 如果你在项目子目录中执行，请直接传 skill 名称，如 `hs-cli skills install my-skill`');
-  console.error('- 如果这是 git skill，请传仓库地址，例如 `hs-cli skills add git+https://example.com/your-skill.git`');
-  console.error('- 或传绝对路径到 skill 目录');
-  process.exit(1);
-}
-
-function detectInstallSourceType(
-  sourcePath: string,
-  workspaceRoot: string
-): 'workspace' | 'local' | 'official' {
-  const resolvedSource = path.resolve(sourcePath);
-  const resolvedWorkspaceRoot = path.resolve(workspaceRoot);
-  const resolvedOfficialRoot = path.resolve(resolveOfficialSkillsRoot());
-
-  if (resolvedSource.startsWith(resolvedOfficialRoot + path.sep) || resolvedSource === resolvedOfficialRoot) {
-    return 'official';
-  }
-
-  if (resolvedSource.startsWith(resolvedWorkspaceRoot + path.sep) || resolvedSource === resolvedWorkspaceRoot) {
-    return 'workspace';
-  }
-
-  return 'local';
-}
-
-async function isDirectory(targetPath: string): Promise<boolean> {
-  try {
-    const stat = await fs.stat(targetPath);
-    return stat.isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-function normalizeAgent(input?: string): SkillAgent {
-  const value = String(input || '').trim().toLowerCase();
-  if (getSupportedSkillAgents().includes(value as SkillAgent)) {
-    return value as SkillAgent;
-  }
-  console.error(chalk.red(`无效 agent: ${input}. 仅支持 ${getSupportedSkillAgents().join(' | ')}`));
-  process.exit(1);
 }
 
 async function getSkillDirectories(skillsRoot: string): Promise<string[]> {

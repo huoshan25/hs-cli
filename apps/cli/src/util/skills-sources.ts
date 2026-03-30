@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-export type SkillSourceKind = 'workspace' | 'official';
+export type SkillSourceKind = 'workspace';
 
 export interface SkillRecord {
   id: string;
@@ -84,9 +84,13 @@ export function readSkillsFromRoot(rootDir: string, source: SkillSourceKind): Sk
 function resolveWorkspaceSkillsRoot(cwd: string): string {
   let current = path.resolve(cwd);
   while (true) {
-    const candidate = path.join(current, 'skills');
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
-      return candidate;
+    const direct = path.join(current, 'skills');
+    if (fs.existsSync(direct) && fs.statSync(direct).isDirectory()) {
+      return direct;
+    }
+    const inPackages = path.join(current, 'packages', 'skills');
+    if (fs.existsSync(inPackages) && fs.statSync(inPackages).isDirectory()) {
+      return inPackages;
     }
     const parent = path.dirname(current);
     if (parent === current) break;

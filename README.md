@@ -13,29 +13,30 @@
 - 📦 共享工具包，提高代码复用性
 - 🔧 统一的开发、构建和发布流程
 - 🖥️ 支持 OpenSpec 命令行/TUI/Web 可视化面板
-- 🤖 提供仓库级 `skills/` 作者侧目录与 `hs-cli skills` 管理命令
-- 🔗 支持将 skill 安装到用户目录，并链接到 AI 客户端消费目录
+- 🤖 提供仓库级 `packages/skills/` 作者侧目录与 `hs-cli skills` 管理命令
+- 🔗 安装分发委托给 `npx skills`，hs-cli 专注作者侧内容质量
 
 ## 仓库结构
 
 ```
 .
 ├── apps                       # 应用程序
-│   └── cli                    # CLI 工具入口
-│       ├── bin                # 可执行文件
-│       ├── dist               # 构建输出目录
-│       └── src                # 源代码
-│           ├── commands       # 命令实现
-│           │   ├── create/    # create 命令（含模板和处理器）
-│           │   ├── generate.ts
-│           │   ├── init.ts
-│           │   └── openspec.ts
-│   └── hs-console             # Console Web 面板
-├── skills                     # AI skills 资产目录
-│   ├── registry               # skills 注册表
-│   └── templates              # skills 模板目录
-└── packages                   # 共享包
-    └── utils                  # 共享工具函数包
+│   ├── cli                    # CLI 工具入口
+│   │   ├── bin                # 可执行文件
+│   │   ├── dist               # 构建输出目录
+│   │   └── src                # 源代码
+│   │       ├── commands       # 命令实现
+│   │       │   ├── create/    # create 命令（含模板和处理器）
+│   │       │   ├── generate.ts
+│   │       │   ├── init.ts
+│   │       │   └── openspec.ts
+│   ├── hs-console             # Console Web 面板
+│   └── skills-site            # Skills 对外展示站点（Well-Known 协议）
+├── packages                   # 共享包
+│   ├── skills                 # AI skills 内容资产目录
+│   │   ├── registry           # skills 注册表
+│   │   └── templates          # skills 模板目录
+│   └── utils                  # 共享工具函数包
 ```
 
 ## 包说明
@@ -44,44 +45,43 @@
 
 主要的 CLI 工具，支持项目创建、代码生成、配置初始化、Console 可视化面板（`hs-cli console`）以及 skills 管理（`hs-cli skills`）。
 
-当前 skills 的使用模型是：
+hs-cli 负责作者侧闭环，安装分发委托给 `npx skills`：
 
-- 项目中的 `skills/` 目录只负责存放作者侧源文件
-- CLI 发布包可携带官方内置 skills，用户安装后可直接查看和安装
-- 用户通过 `hs-cli skills add` 或 `hs-cli skills install` 把 skill 安装到全局用户目录
-- 用户再通过 `hs-cli skills link --agent codex` 把已安装 skill 链接到 Codex 的消费目录
+- `hs-cli skills new <name>` — 基于模板创建 skill 目录
+- `hs-cli skills lint [name]` — 结构与质量校验
+- `hs-cli skills list` — 查看当前 workspace 中的 skills
 
-最短使用路径：
+完整工作流：
 
 ```bash
-# 用户侧：查看 CLI 自带的官方 skills
-hs-cli skills list --scope official
+# 1. 创建 skill
+hs-cli skills new my-skill
 
-# 安装官方 skill，默认会链接到 Codex
-hs-cli skills add code-review-guardian
+# 2. 编辑 packages/skills/my-skill/SKILL.md 和 metadata.yaml
 
-# 安装本地第三方 skill
-hs-cli skills add ./path/to/other-skill
+# 3. 校验质量
+hs-cli skills lint my-skill
 
-# 安装第三方 git skill
-hs-cli skills add git+https://example.com/your-skill.git
-
-# 查看已安装状态
-hs-cli skills list --scope installed
-hs-cli skills doctor
+# 4. 安装到 AI 客户端（通过 skills-site 或直接路径）
+npx skills add https://your-domain.com --skill my-skill
 ```
 
-默认路径：
-
-- 安装目录：`~/.hs-cli/skills/installed`
-- Codex 目录：`~/.codex/skills`
-
-Windows 下等价目录位于 `%USERPROFILE%` 下，对应：
-
-- `%USERPROFILE%\\.hs-cli\\skills\\installed`
-- `%USERPROFILE%\\.codex\\skills`
+skill 的安装、卸载、agent link、环境检查等由 [`npx skills`](https://github.com/vercel-labs/agent-skills) 负责，hs-cli 不重复实现。
 
 > **注意**: 关于 CLI 工具的详细使用方法，请查看 [CLI 工具的 README 文档](./apps/cli/README.md)
+
+### skills-site
+
+对外的 skill 展示站点，基于 Well-Known 协议对外暴露 skill 信息，支持通过 `npx skills add` 安装。
+
+```bash
+# 用户安装单个 skill
+npx skills add https://your-domain.com --skill spec-proposal-writer
+
+# 本地开发
+cd apps/skills-site
+pnpm dev
+```
 
 ### utils
 

@@ -14,41 +14,21 @@
 
 ## Skills 使用模型
 
-`skills/` 目录是作者侧源目录，不是 Agent 直接消费目录。当前推荐路径是：
+`packages/skills/` 是作者侧源目录，负责 skill 内容的创建与质量把关。安装分发通过 `apps/skills-site` 站点的 Well-Known 协议对外提供。
 
-```text
-workspace skill
-your-project/skills/my-skill
-
-    add / install
-
-installed skill
-~/.hs-cli/skills/installed/my-skill
-
-    link
-
-codex skill
-~/.codex/skills/my-skill
-```
-
-最短使用路径：
+完整工作流：
 
 ```bash
-# 用户侧：查看 CLI 自带的官方 skills
-hs-cli skills list --scope official
+# 1. 创建 skill
+hs-cli skills new my-skill
 
-# 安装官方 skill，默认链接到 Codex
-hs-cli skills add code-review-guardian
+# 2. 编辑 packages/skills/my-skill/SKILL.md 和 metadata.yaml
 
-# 安装本地第三方 skill
-hs-cli skills add ./path/to/other-skill
+# 3. 校验质量
+hs-cli skills lint my-skill
 
-# 安装第三方 git skill
-hs-cli skills add git+https://example.com/your-skill.git
-
-# 查看安装和链接状态
-hs-cli skills list --scope installed
-hs-cli skills doctor
+# 4. 安装到 AI 客户端（通过 skills-site）
+npx skills add https://your-domain.com --skill my-skill
 ```
 
 ## 安装
@@ -118,47 +98,14 @@ hs-cli skills new copywriter
 # 列出当前工作区内 skills
 hs-cli skills list
 
-# 列出 CLI 自带的官方 skills
-hs-cli skills list --scope official
-
-# 列出当前已安装 skills
-hs-cli skills list --scope installed
-
 # 校验所有 skills 结构
 hs-cli skills lint
 
 # 仅校验指定 skill
 hs-cli skills lint copywriter
 
-# 用户侧主命令：安装官方 skill 并默认链接到 Codex
-hs-cli skills add code-review-guardian
-
-# 安装本地第三方 skill
-hs-cli skills add ./path/to/other-skill
-
-# 安装第三方 git skill
-hs-cli skills add git+https://example.com/your-skill.git
-
-# 从当前工作区安装 skill 并默认链接到 Codex
-hs-cli skills add copywriter
-
-# 在项目根目录安装当前工作区 skill
-hs-cli skills add ./skills/copywriter
-
-# 在项目任意子目录里，直接按 skill 名称安装当前工作区 skills 下的目录
-hs-cli skills add copywriter
-
-# 只安装，不自动链接
-hs-cli skills add copywriter --no-link
-
-# 链接到 Codex
-hs-cli skills link copywriter --agent codex
-
-# 检查已安装 skill 与 link 状态
-hs-cli skills doctor
-
-# 移除已安装 skill
-hs-cli skills remove copywriter
+# 安装到 AI 客户端（通过 skills-site）
+npx skills add https://your-domain.com --skill copywriter
 
 # 查看帮助
 hs-cli --help
@@ -183,77 +130,25 @@ hs-cli console [options]
 hs-cli skills <command>
 ```
 
-- `new <name>`: 使用 `skills/templates/skill-template` 创建 skill 目录
-- `list [--scope workspace|official|installed]`: 列出当前工作区中的 skills、CLI 自带的官方 skills，或已安装的 skills
-- `add <source>`: 用户侧主命令。支持安装官方 skill、当前工作区 skill、本地目录 skill 或 git 仓库 skill，并默认自动链接到 Codex
+- `new <name>`: 使用 `packages/skills/templates/skill-template` 创建 skill 目录
+- `list`: 列出当前工作区中的 skills
 - `lint [name]`: 校验单个或全部 workspace skill 的目录结构与 `description` 质量（长度、动作词、场景词、泛化词）
-- `install <source>`: 与 `add` 等价，保留为显式安装命令
-- `remove <name>`: 删除已安装 skill，并清理相关 agent link
-- `link <name> --agent codex`: 将已安装 skill 链接到 Codex 的 skills 目录
-- `doctor`: 检查已安装 skill、用户安装目录以及 agent link 状态
 
-默认安装目录为 `~/.hs-cli/skills/installed`，可通过 `HS_CLI_INSTALLED_SKILLS_DIR` 覆盖。
-
-Codex 默认链接目录为 `~/.codex/skills`，可通过 `HS_CLI_CODEX_SKILLS_DIR` 或 `CODEX_HOME` 覆盖。
+skill 的安装、卸载、agent link、环境检查由 [`npx skills`](https://github.com/vercel-labs/agent-skills) 负责，hs-cli 不重复实现。
 
 ### Skills 目录模型
 
-skills 当前分成三层目录，不要混用：
-
-1. 来源目录
-
-- 这是项目仓库里的作者侧目录，例如 `your-project/skills/my-skill`
-- 用于编写、评审和版本管理
-
-2. 安装目录
-
-- 这是用户机器上的全局目录
-- macOS / Linux 默认路径：`~/.hs-cli/skills/installed/<skill-id>`
-- Windows 默认路径：`%USERPROFILE%\\.hs-cli\\skills\\installed\\<skill-id>`
-- `hs-cli skills add <source>` 会把来源目录复制到这里
-
-3. Agent 消费目录
-
-- 这是 AI 客户端真正读取的目录
-- Codex 默认路径：
-- macOS / Linux：`~/.codex/skills/<skill-id>`
-- Windows：`%USERPROFILE%\\.codex\\skills\\<skill-id>`
-- `hs-cli skills add <source>` 默认会自动链接到这里
-- 也可以手动执行 `hs-cli skills link <name> --agent codex`
-
-关系如下：
-
 ```text
-项目里的源 skill
-your-project/skills/my-skill
+workspace skill（作者侧，hs-cli 负责）
+your-project/packages/skills/my-skill
 
-    install
+    npx skills add https://your-domain.com --skill my-skill
 
-用户全局安装目录
-~/.hs-cli/skills/installed/my-skill
-
-    link
-
-Codex 读取目录
+agent 消费目录（npx skills 负责）
+.claude/skills/my-skill      ← 项目级
+~/.claude/skills/my-skill    ← 全局
 ~/.codex/skills/my-skill
 ```
-
-这意味着：
-
-- skill 可以来自 CLI 自带官方目录、当前项目、本地其他目录或 git 仓库
-- 安装后不再依赖原项目目录持续存在
-- 同一个用户可以从多个项目安装不同 skills
-- CLI 的主路径是“全局安装 + 链接到 agent”，不是在单个项目目录里直接运行
-
-安装命令的路径解析规则：
-
-- 传官方 skill 名称时，优先从 CLI 自带官方 skills 中安装
-- 传 `git+https://...`、`https://...git` 或 `git@...` 时，会先临时克隆仓库，再从其中解析 skill 目录
-- 传绝对路径时，按绝对路径安装
-- 传相对路径时，优先按当前 shell 的 `cwd` 解析
-- 如果当前在项目子目录中，建议直接传 skill 名称，例如 `hs-cli skills add my-skill`
-- `hs-cli` 会自动定位最近的 workspace `skills/` 目录，并在其中查找同名 skill
-- 如果本地和官方存在同名 skill，当前实现会优先采用本地目录解析，再回退到官方内置 skills
 
 ### Console Web 快捷键
 

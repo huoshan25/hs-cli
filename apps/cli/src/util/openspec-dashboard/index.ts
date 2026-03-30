@@ -24,10 +24,8 @@ export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui
         projects,
         skills: skillsPayload.items,
         skillsRoot: skillsPayload.root,
-        officialSkills: skillsPayload.officialItems,
-        officialSkillsRoot: skillsPayload.officialRoot,
-        installedSkills: skillsPayload.installedItems,
-        installedSkillsRoot: skillsPayload.installedDir,
+        projectInstalledSkills: skillsPayload.projectInstalledItems,
+        globalInstalledSkills: skillsPayload.globalInstalledItems,
         initialPath: module === 'skills' ? '/skills' : '/',
         recentProjects: loadRecentProjects(),
         activeProjects: listActiveProjects(),
@@ -44,10 +42,8 @@ export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui
             projects: next,
             skills: nextSkillsPayload.items,
             skillsRoot: nextSkillsPayload.root,
-            officialSkills: nextSkillsPayload.officialItems,
-            officialSkillsRoot: nextSkillsPayload.officialRoot,
-            installedSkills: nextSkillsPayload.installedItems,
-            installedSkillsRoot: nextSkillsPayload.installedDir,
+            projectInstalledSkills: nextSkillsPayload.projectInstalledItems,
+            globalInstalledSkills: nextSkillsPayload.globalInstalledItems,
             recentProjects: loadRecentProjects(),
             activeProjects: listActiveProjects()
           };
@@ -100,10 +96,8 @@ export async function runOpenSpecPanel({ cwd, theme = 'dark', docPath, ui = 'tui
             projects,
             skills: skillsPayload.items,
             skillsRoot: skillsPayload.root,
-            officialSkills: skillsPayload.officialItems,
-            officialSkillsRoot: skillsPayload.officialRoot,
-            installedSkills: skillsPayload.installedItems,
-            installedSkillsRoot: skillsPayload.installedDir,
+            projectInstalledSkills: skillsPayload.projectInstalledItems,
+            globalInstalledSkills: skillsPayload.globalInstalledItems,
             recentProjects: loadRecentProjects(),
             activeProjects: listActiveProjects()
           };
