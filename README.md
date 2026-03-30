@@ -49,7 +49,6 @@ hs-cli 负责作者侧闭环，安装分发委托给 `npx skills`：
 
 - `hs-cli skills new <name>` — 基于模板创建 skill 目录
 - `hs-cli skills lint [name]` — 结构与质量校验
-- `hs-cli skills list` — 查看当前 workspace 中的 skills
 
 完整工作流：
 

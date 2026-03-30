@@ -101,29 +101,6 @@ export function skillsCommand(program: Command): void {
     });
 
   skills
-    .command('list')
-    .description('列出当前工作区所有 skills')
-    .action(async () => {
-      const cwd = process.cwd();
-      const workspaceSkills = collectSkills({ cwd }).items.filter(
-        (item) => item.source === 'workspace'
-      );
-
-      if (workspaceSkills.length === 0) {
-        console.log(chalk.yellow('当前工作区未发现可用 skills'));
-        console.log(`hint: skills 应放在 ${locateWorkspaceSkillsRoot(cwd)} 目录下`);
-        return;
-      }
-
-      console.log(`workspace: ${locateWorkspaceSkillsRoot(cwd)}\n`);
-      for (const item of workspaceSkills) {
-        console.log(`- ${item.name}  v${item.version}`);
-        console.log(`  ${item.description}`);
-        console.log(`  root: ${item.root}`);
-      }
-    });
-
-  skills
     .command('lint')
     .description('校验工作区 skill 目录结构与 description 质量')
     .argument('[name]', '只校验指定 skill，不传则校验全部')

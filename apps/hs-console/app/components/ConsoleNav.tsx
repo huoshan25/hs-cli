@@ -33,9 +33,6 @@ export function ConsoleNav() {
         <NavLink to="/" end className={({ isActive }) => `console-nav__item ${isActive ? 'active' : ''}`}>
           OpenSpec
         </NavLink>
-        <NavLink to="/skills" className={({ isActive }) => `console-nav__item ${isActive ? 'active' : ''}`}>
-          Skills
-        </NavLink>
       </div>
       <button
         className="console-nav__theme"

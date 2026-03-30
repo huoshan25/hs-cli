@@ -18,8 +18,6 @@ const CONTENT_TYPES = {
 
 export async function renderWebDashboard({
   projects,
-  skills = [],
-  skillsRoot = '',
   projectInstalledSkills = [],
   globalInstalledSkills = [],
   initialPath = '/',
@@ -32,8 +30,6 @@ export async function renderWebDashboard({
   runOpenSpecAction
 }) {
   let currentProjects = projects;
-  let currentSkills = skills;
-  let currentSkillsRoot = skillsRoot;
   let currentProjectInstalledSkills = projectInstalledSkills;
   let currentGlobalInstalledSkills = globalInstalledSkills;
   let currentRecentProjects = recentProjects;
@@ -43,8 +39,6 @@ export async function renderWebDashboard({
     currentProjects,
     currentRecentProjects,
     currentActiveProjects,
-    currentSkills,
-    currentSkillsRoot,
     currentProjectInstalledSkills,
     currentGlobalInstalledSkills
   );
@@ -73,8 +67,6 @@ export async function renderWebDashboard({
     if (pathname === '/api/skills') {
       sendJson(res, 200, {
         version,
-        items: currentSkills,
-        root: currentSkillsRoot,
         projectInstalledItems: currentProjectInstalledSkills,
         globalInstalledItems: currentGlobalInstalledSkills
       });
@@ -107,8 +99,6 @@ export async function renderWebDashboard({
           currentProjects,
           currentRecentProjects,
           currentActiveProjects,
-          currentSkills,
-          currentSkillsRoot,
           currentProjectInstalledSkills,
           currentGlobalInstalledSkills
         );
@@ -145,8 +135,6 @@ export async function renderWebDashboard({
           currentProjects,
           currentRecentProjects,
           currentActiveProjects,
-          currentSkills,
-          currentSkillsRoot,
           currentProjectInstalledSkills,
           currentGlobalInstalledSkills
         );
@@ -173,8 +161,6 @@ export async function renderWebDashboard({
         })) || {};
 
         currentProjects = Array.isArray(result.projects) ? result.projects : currentProjects;
-        currentSkills = Array.isArray(result.skills) ? result.skills : currentSkills;
-        currentSkillsRoot = typeof result.skillsRoot === 'string' ? result.skillsRoot : currentSkillsRoot;
         currentProjectInstalledSkills = Array.isArray(result.projectInstalledSkills) ? result.projectInstalledSkills : currentProjectInstalledSkills;
         currentGlobalInstalledSkills = Array.isArray(result.globalInstalledSkills) ? result.globalInstalledSkills : currentGlobalInstalledSkills;
         currentRecentProjects = Array.isArray(result.recentProjects) ? result.recentProjects : currentRecentProjects;
@@ -183,8 +169,6 @@ export async function renderWebDashboard({
           currentProjects,
           currentRecentProjects,
           currentActiveProjects,
-          currentSkills,
-          currentSkillsRoot,
           currentProjectInstalledSkills,
           currentGlobalInstalledSkills
         );
@@ -239,8 +223,6 @@ export async function renderWebDashboard({
       try {
         const payload = (await reload()) || {};
         const nextProjects = Array.isArray(payload) ? payload : (payload.projects || []);
-        const nextSkills = Array.isArray(payload.skills) ? payload.skills : currentSkills;
-        const nextSkillsRoot = typeof payload.skillsRoot === 'string' ? payload.skillsRoot : currentSkillsRoot;
         const nextProjectInstalledSkills = Array.isArray(payload.projectInstalledSkills) ? payload.projectInstalledSkills : currentProjectInstalledSkills;
         const nextGlobalInstalledSkills = Array.isArray(payload.globalInstalledSkills) ? payload.globalInstalledSkills : currentGlobalInstalledSkills;
         const nextRecentProjects = Array.isArray(payload.recentProjects) ? payload.recentProjects : currentRecentProjects;
@@ -249,15 +231,11 @@ export async function renderWebDashboard({
           nextProjects,
           nextRecentProjects,
           nextActiveProjects,
-          nextSkills,
-          nextSkillsRoot,
           nextProjectInstalledSkills,
           nextGlobalInstalledSkills
         );
         if (nextSignature !== signature) {
           currentProjects = nextProjects;
-          currentSkills = nextSkills;
-          currentSkillsRoot = nextSkillsRoot;
           currentProjectInstalledSkills = nextProjectInstalledSkills;
           currentGlobalInstalledSkills = nextGlobalInstalledSkills;
           currentRecentProjects = nextRecentProjects;
@@ -341,7 +319,7 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
-function projectSignature(projects, recentProjects, activeProjects, skills, skillsRoot, projectInstalledSkills, globalInstalledSkills) {
+function projectSignature(projects, recentProjects, activeProjects, projectInstalledSkills, globalInstalledSkills) {
   const p = (Array.isArray(projects) ? projects : []).map(item => ({
     name: item?.name || '',
     root: item?.root || '',
@@ -357,16 +335,13 @@ function projectSignature(projects, recentProjects, activeProjects, skills, skil
   const a = (Array.isArray(activeProjects) ? activeProjects : [])
     .map(item => `${item.path}:${item.exists === false ? '0' : '1'}`)
     .sort();
-  const s = (Array.isArray(skills) ? skills : [])
-    .map(item => `${item.id}:${item.version || ''}:${item.updatedAt || 0}:${item.status || ''}`)
-    .sort();
   const pi = (Array.isArray(projectInstalledSkills) ? projectInstalledSkills : [])
     .map(item => `${item.name}:${item.linkedAgents?.length || 0}`)
     .sort();
   const gi = (Array.isArray(globalInstalledSkills) ? globalInstalledSkills : [])
     .map(item => `${item.name}:${item.updatedAt || ''}:${item.linkedAgents?.length || 0}`)
     .sort();
-  return JSON.stringify({ p, r, a, s, sr: skillsRoot || '', pi, gi });
+  return JSON.stringify({ p, r, a, pi, gi });
 }
 
 function readJsonBody(req) {

@@ -12,7 +12,6 @@ interface ConsoleOptions {
   theme?: string;
   ui?: string;
   watch?: boolean;
-  skillsDir?: string;
 }
 
 const SUPPORTED_THEMES = new Set<ThemeMode>(['dark', 'light']);
@@ -101,7 +100,6 @@ async function launchConsoleModule(module: 'openspec' | 'skills', options: Conso
       ui,
       watch,
       module,
-      skillsDir: options.skillsDir ? path.resolve(process.cwd(), options.skillsDir) : undefined,
       docPath: options.doc ? path.resolve(process.cwd(), options.doc) : undefined
     });
   } catch (error: any) {
@@ -114,7 +112,6 @@ async function launchConsoleModule(module: 'openspec' | 'skills', options: Conso
           ui: 'tui',
           watch,
           module,
-          skillsDir: options.skillsDir ? path.resolve(process.cwd(), options.skillsDir) : undefined,
           docPath: options.doc ? path.resolve(process.cwd(), options.doc) : undefined
         });
         return;
@@ -135,7 +132,6 @@ export function consoleCommand(program: Command): void {
 
   consoleProgram
     .option('-d, --doc <path>', '指定 OpenSpec 文档路径')
-    .option('-s, --skills-dir <path>', '指定 skills 目录路径（默认自动向上查找）')
     .option('-t, --theme <theme>', '主题 dark|light', 'dark')
     .option('-u, --ui <mode>', '面板模式 auto|tui|web', 'auto')
     .option('--no-watch', '关闭 Web 热更新')
@@ -160,7 +156,6 @@ export function consoleCommand(program: Command): void {
   consoleProgram
     .command('skills')
     .description('直接进入 Skills 模块')
-    .option('-s, --skills-dir <path>', '指定 skills 目录路径（默认自动向上查找）')
     .option('-u, --ui <mode>', '面板模式 auto|tui|web', 'web')
     .option('-t, --theme <theme>', '主题 dark|light', 'dark')
     .option('--no-watch', '关闭 Web 热更新')

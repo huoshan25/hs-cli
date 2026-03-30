@@ -80,9 +80,6 @@ hs-cli console openspec --ui web
 # 直达 Skills 模块
 hs-cli console skills
 
-# 在任意目录指定 skills 路径
-hs-cli console skills --skills-dir /path/to/repo/skills
-
 # 强制使用 Web 面板
 hs-cli console --ui web
 
@@ -94,9 +91,6 @@ hs-cli console --doc ./openspec/project.md --theme light
 
 # 基于模板创建 skill
 hs-cli skills new copywriter
-
-# 列出当前工作区内 skills
-hs-cli skills list
 
 # 校验所有 skills 结构
 hs-cli skills lint
@@ -118,7 +112,6 @@ hs-cli console [options]
 ```
 
 - `-d, --doc <path>`: 指定 OpenSpec 文档路径
-- `-s, --skills-dir <path>`: 指定 skills 目录路径（默认从当前目录向上自动查找）
 - `-t, --theme <theme>`: 主题，`dark|light`，默认 `dark`
 - `-u, --ui <mode>`: 面板模式，`auto|tui|web`，默认 `auto`
 - `--no-watch`: 关闭 Web 热更新（默认开启）
@@ -131,8 +124,7 @@ hs-cli skills <command>
 ```
 
 - `new <name>`: 使用 `packages/skills/templates/skill-template` 创建 skill 目录
-- `list`: 列出当前工作区中的 skills
-- `lint [name]`: 校验单个或全部 workspace skill 的目录结构与 `description` 质量（长度、动作词、场景词、泛化词）
+- `lint [name]`: 校验单个或全部 workspace skill 的目录结构与 `description` 质量
 
 skill 的安装、卸载、agent link、环境检查由 [`npx skills`](https://github.com/vercel-labs/agent-skills) 负责，hs-cli 不重复实现。
 

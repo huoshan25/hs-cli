@@ -1,6 +1,5 @@
 import type { MetaFunction } from 'react-router';
 import DashboardApp from '../dashboard/DashboardApp';
-import { ConsoleNav } from '../components/ConsoleNav';
 
 export const meta: MetaFunction = () => {
   return [
@@ -10,10 +9,5 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Home() {
-  return (
-    <>
-      <ConsoleNav />
-      <DashboardApp />
-    </>
-  );
+  return <DashboardApp />;
 }
